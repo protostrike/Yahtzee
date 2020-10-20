@@ -29,14 +29,14 @@ public class ScoreCardTest {
             expectedScore = calculateScore(dices, scoreType.Ones);
             sc.score(dices, 0);
             try{
-                Assert.assertEquals(expectedScore, sc.lowerSection[0]);
+                Assert.assertEquals(expectedScore, sc.upperSection[0]);
             }
             catch (AssertionError e){
                 System.out.println("Error when testing scoring in Ones\n"+
                         "Expected: " + expectedScore + "\n"+
-                        "Actual: " + sc.lowerSection[0]);
+                        "Actual: " + sc.upperSection[0]);
             };
-            sc.lowerSection[0] = 0;
+            sc.upperSection[0] = 0;
         }
         return;
     }
@@ -46,14 +46,14 @@ public class ScoreCardTest {
             expectedScore = calculateScore(dices, scoreType.Twos);
             sc.score(dices, 1);
             try{
-                Assert.assertEquals(expectedScore, sc.lowerSection[1]);
+                Assert.assertEquals(expectedScore, sc.upperSection[1]);
             }
             catch (AssertionError e){
                 System.out.println("Error when testing scoring in Twos\n"+
                         "Expected: " + expectedScore + "\n"+
-                        "Actual: " + sc.lowerSection[1]);
+                        "Actual: " + sc.upperSection[1]);
             };
-            sc.lowerSection[1] = 0;
+            sc.upperSection[1] = 0;
         }
         return;
     }
@@ -63,14 +63,14 @@ public class ScoreCardTest {
             expectedScore = calculateScore(dices, scoreType.Threes);
             sc.score(dices, 2);
             try{
-                Assert.assertEquals(expectedScore, sc.lowerSection[2]);
+                Assert.assertEquals(expectedScore, sc.upperSection[2]);
             }
             catch (AssertionError e){
                 System.out.println("Error when testing scoring in Threes\n"+
                         "Expected: " + expectedScore + "\n"+
-                        "Actual: " + sc.lowerSection[2]);
+                        "Actual: " + sc.upperSection[2]);
             };
-            sc.lowerSection[2] = 0;
+            sc.upperSection[2] = 0;
         }
         return;
     }
@@ -80,14 +80,14 @@ public class ScoreCardTest {
             expectedScore = calculateScore(dices, scoreType.Fours);
             sc.score(dices, 3);
             try{
-                Assert.assertEquals(expectedScore, sc.lowerSection[3]);
+                Assert.assertEquals(expectedScore, sc.upperSection[3]);
             }
             catch (AssertionError e){
                 System.out.println("Error when testing scoring in Fours\n"+
                         "Expected: " + expectedScore + "\n"+
-                        "Actual: " + sc.lowerSection[3]);
+                        "Actual: " + sc.upperSection[3]);
             };
-            sc.lowerSection[3] = 0;
+            sc.upperSection[3] = 0;
         }
         return;
     }
@@ -97,14 +97,14 @@ public class ScoreCardTest {
             expectedScore = calculateScore(dices, scoreType.Fives);
             sc.score(dices, 4);
             try{
-                Assert.assertEquals(expectedScore, sc.lowerSection[4]);
+                Assert.assertEquals(expectedScore, sc.upperSection[4]);
             }
             catch (AssertionError e){
                 System.out.println("Error when testing scoring in Fives\n"+
                         "Expected: " + expectedScore + "\n"+
-                        "Actual: " + sc.lowerSection[4]);
+                        "Actual: " + sc.upperSection[4]);
             };
-            sc.lowerSection[4] = 0;
+            sc.upperSection[4] = 0;
         }
         return;
     }
@@ -114,14 +114,14 @@ public class ScoreCardTest {
             expectedScore = calculateScore(dices, scoreType.Sixes);
             sc.score(dices, 5);
             try{
-                Assert.assertEquals(expectedScore, sc.lowerSection[5]);
+                Assert.assertEquals(expectedScore, sc.upperSection[5]);
             }
             catch (AssertionError e){
                 System.out.println("Error when testing scoring in Sixes\n"+
                         "Expected: " + expectedScore + "\n"+
-                        "Actual: " + sc.lowerSection[5]);
+                        "Actual: " + sc.upperSection[5]);
             };
-            sc.lowerSection[5] = 0;
+            sc.upperSection[5] = 0;
         }
         return;
     }
