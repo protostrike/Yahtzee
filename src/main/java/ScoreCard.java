@@ -26,9 +26,11 @@ public class ScoreCard {
     private void scoreUppers(int[] dices, int category){
         for(int dice : dices){
             if(dice==category+1){
-                if(upperSection[category]==-1)
+                if(upperSection[category]==-1) {
                     //If no score is in yet, make the first dice as the initial score
                     upperSection[category] = dice;
+                    continue;
+                }
                 upperSection[category] += dice;
             }
         }

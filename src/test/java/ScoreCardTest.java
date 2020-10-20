@@ -22,6 +22,7 @@ public class ScoreCardTest {
         testFours();
         testFives();
         testSixes();
+        System.out.println("Test upper section scoring passed");
     }
     public void testOnes(){
         int expectedScore;
