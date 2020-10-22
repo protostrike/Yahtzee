@@ -133,10 +133,10 @@ public class ScoreCard {
         int head = dices[0];
         int tail = dices[dices.length-1];
 
-        for(int i = 0; i < dices.length; i++) {
-            if(dices[i] == head)
+        for (int dice : dices) {
+            if (dice == head)
                 first++;
-            else if(dices[i] == tail)
+            else if (dice == tail)
                 second++;
         }
 

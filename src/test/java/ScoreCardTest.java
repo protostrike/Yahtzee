@@ -1,6 +1,5 @@
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.Assert.*;
 
 import java.util.Arrays;
 
@@ -14,7 +13,7 @@ public class ScoreCardTest {
             {4,4,3,4,5},
             {6,6,3,6,6},
             };
-    enum scoreType {Ones, Twos, Threes, Fours, Fives, Sixes, ThreeOfAKind, FourOfAKind, FullHouse, SmallStraight, LargeStraight, Yahtzee, Chance};
+    enum scoreType {Ones, Twos, Threes, Fours, Fives, Sixes, ThreeOfAKind, FourOfAKind, FullHouse, SmallStraight, LargeStraight, Yahtzee, Chance}
 
     @Test
     public void testSingleTimeScoring(){
@@ -52,10 +51,9 @@ public class ScoreCardTest {
                 System.out.println("Error when testing scoring in Ones\n"+
                         "Expected: " + expectedScore + "\n"+
                         "Actual: " + sc.upperSection[0]);
-            };
+            }
             sc.upperSection[0] = 0;
         }
-        return;
     }
     public void testTwos(){
         int expectedScore;
@@ -69,10 +67,9 @@ public class ScoreCardTest {
                 System.out.println("Error when testing scoring in Twos\n"+
                         "Expected: " + expectedScore + "\n"+
                         "Actual: " + sc.upperSection[1]);
-            };
+            }
             sc.upperSection[1] = 0;
         }
-        return;
     }
     public void testThrees(){
         int expectedScore;
@@ -86,10 +83,9 @@ public class ScoreCardTest {
                 System.out.println("Error when testing scoring in Threes\n"+
                         "Expected: " + expectedScore + "\n"+
                         "Actual: " + sc.upperSection[2]);
-            };
+            }
             sc.upperSection[2] = 0;
         }
-        return;
     }
     public void testFours(){
         int expectedScore;
@@ -103,10 +99,9 @@ public class ScoreCardTest {
                 System.out.println("Error when testing scoring in Fours\n"+
                         "Expected: " + expectedScore + "\n"+
                         "Actual: " + sc.upperSection[3]);
-            };
+            }
             sc.upperSection[3] = 0;
         }
-        return;
     }
     public void testFives(){
         int expectedScore;
@@ -120,10 +115,9 @@ public class ScoreCardTest {
                 System.out.println("Error when testing scoring in Fives\n"+
                         "Expected: " + expectedScore + "\n"+
                         "Actual: " + sc.upperSection[4]);
-            };
+            }
             sc.upperSection[4] = 0;
         }
-        return;
     }
     public void testSixes(){
         int expectedScore;
@@ -137,10 +131,9 @@ public class ScoreCardTest {
                 System.out.println("Error when testing scoring in Sixes\n"+
                         "Expected: " + expectedScore + "\n"+
                         "Actual: " + sc.upperSection[5]);
-            };
+            }
             sc.upperSection[5] = 0;
         }
-        return;
     }
     public void testThreeOfAKind(){
         int expectedScore;
@@ -154,10 +147,9 @@ public class ScoreCardTest {
                 System.out.println("Error when testing scoring in Three Of A Kind\n"+
                         "Expected: " + expectedScore + "\n"+
                         "Actual: " + sc.lowerSection[0]);
-            };
+            }
             sc.lowerSection[0] = 0;
         }
-        return;
     }
     public void testFourOfAKind(){
         for(int[] dices : testDices){
@@ -171,10 +163,9 @@ public class ScoreCardTest {
                 System.out.println("Error when testing scoring in Four Of A Kind\n"+
                         "Expected: " + expectedScore + "\n"+
                         "Actual: " + sc.lowerSection[1]);
-            };
+            }
             sc.lowerSection[1] = 0;
         }
-        return;
     }
 
     public void testSmallStraight(){
@@ -189,10 +180,9 @@ public class ScoreCardTest {
                 System.out.println("Error when testing scoring in Small Straight\n"+
                         "Expected: " + expectedScore + "\n"+
                         "Actual: " + sc.lowerSection[2]);
-            };
+            }
             sc.lowerSection[2] = 0;
         }
-        return;
     }
     public void testLargeStraight(){
         for(int[] dices : testDices){
@@ -206,10 +196,9 @@ public class ScoreCardTest {
                 System.out.println("Error when testing scoring in Large Straight\n"+
                         "Expected: " + expectedScore + "\n"+
                         "Actual: " + sc.lowerSection[3]);
-            };
+            }
             sc.lowerSection[3] = 0;
         }
-        return;
     }
 
     public void testFullHouse(){
@@ -224,7 +213,7 @@ public class ScoreCardTest {
                 System.out.println("Error when testing scoring in Full House\n"+
                         "Expected: " + expectedScore + "\n"+
                         "Actual: " + sc.lowerSection[4]);
-            };
+            }
             sc.lowerSection[4] = 0;
         }
     }
@@ -241,10 +230,9 @@ public class ScoreCardTest {
                 System.out.println("Error when testing scoring in Yahtzee\n"+
                         "Expected: " + expectedScore + "\n"+
                         "Actual: " + sc.lowerSection[5]);
-            };
+            }
             sc.lowerSection[5] = 0;
         }
-        return;
     }
     public void testChance(){
         for(int[] dices : testDices){
@@ -258,10 +246,9 @@ public class ScoreCardTest {
                 System.out.println("Error when testing scoring in Chance\n"+
                         "Expected: " + expectedScore + "\n"+
                         "Actual: " + sc.lowerSection[6]);
-            };
+            }
             sc.lowerSection[6] = 0;
         }
-        return;
     }
 
     private int calculateScore(int[] dices, scoreType type){
@@ -365,10 +352,10 @@ public class ScoreCardTest {
                 int head = dices[0];
                 int tail = dices[dices.length - 1];
 
-                for (int i = 0; i < dices.length; i++) {
-                    if (dices[i] == head)
+                for (int dice : dices) {
+                    if (dice == head)
                         first++;
-                    else if (dices[i] == tail)
+                    else if (dice == tail)
                         second++;
                 }
 
