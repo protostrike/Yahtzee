@@ -2,6 +2,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.Assert.*;
 
+import java.util.Arrays;
+
 public class ScoreCardTest {
     static ScoreCard sc = new ScoreCard();
     int[][] testDices = {{1,2,3,4,5},
@@ -12,7 +14,7 @@ public class ScoreCardTest {
             {4,4,3,4,5},
             {6,6,3,6,6},
             };
-    enum scoreType {Ones, Twos, Threes, Fours, Fives, Sixes, ThreeOfAKind, FourOfAKind, FullHouse, SmallStraight, LargeStraight};
+    enum scoreType {Ones, Twos, Threes, Fours, Fives, Sixes, ThreeOfAKind, FourOfAKind, FullHouse, SmallStraight, LargeStraight, Yahtzee, Chance};
 
     @Test
     public void testUpperScoring(){
@@ -127,11 +129,37 @@ public class ScoreCardTest {
         return;
     }
     public void testThreeOfAKind(){
-
+        int expectedScore;
+        for(int[] dices : testDices){
+            expectedScore = calculateScore(dices, scoreType.ThreeOfAKind);
+            sc.score(dices, 6);
+            try{
+                Assert.assertEquals(expectedScore, sc.lowerSection[0]);
+            }
+            catch (AssertionError e){
+                System.out.println("Error when testing scoring in Three Of A Kind\n"+
+                        "Expected: " + expectedScore + "\n"+
+                        "Actual: " + sc.lowerSection[0]);
+            };
+            sc.lowerSection[0] = 0;
+        }
         return;
     }
     public void testFourOfAKind(){
-
+        for(int[] dices : testDices){
+            int expectedScore;
+            expectedScore = calculateScore(dices, scoreType.FourOfAKind);
+            sc.score(dices, 7);
+            try{
+                Assert.assertEquals(expectedScore, sc.lowerSection[1]);
+            }
+            catch (AssertionError e){
+                System.out.println("Error when testing scoring in Four Of A Kind\n"+
+                        "Expected: " + expectedScore + "\n"+
+                        "Actual: " + sc.lowerSection[1]);
+            };
+            sc.lowerSection[1] = 0;
+        }
         return;
     }
     public void testFullHouse(){
@@ -191,6 +219,34 @@ public class ScoreCardTest {
                 for(int dice: dices){
                     if(dice==6)
                         finalScore += dice;
+                }
+                break;
+            case ThreeOfAKind:
+                Arrays.sort(dices);
+                int count = 1;
+                for(int i = 0; i < dices.length-1; i++){
+                    if(dices[i]==dices[i+1])
+                        count++;
+                    else
+                        count=1;
+                    if(count==3){
+                        finalScore = Arrays.stream(dices).sum();
+                        break;
+                    }
+                }
+                break;
+            case FourOfAKind:
+                Arrays.sort(dices);
+                count = 1;
+                for(int i = 0; i < dices.length-1; i++){
+                    if(dices[i]==dices[i+1])
+                        count++;
+                    else
+                        count=1;
+                    if(count==4){
+                        finalScore = Arrays.stream(dices).sum();
+                        break;
+                    }
                 }
                 break;
         }
