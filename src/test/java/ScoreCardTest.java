@@ -17,7 +17,7 @@ public class ScoreCardTest {
     enum scoreType {Ones, Twos, Threes, Fours, Fives, Sixes, ThreeOfAKind, FourOfAKind, FullHouse, SmallStraight, LargeStraight, Yahtzee, Chance};
 
     @Test
-    public void testUpperScoring(){
+    public void testSingleTimeScoring(){
         testOnes();
         testTwos();
         testThrees();
@@ -33,6 +33,12 @@ public class ScoreCardTest {
         System.out.println("Test Small Straight scoring passed");
         testLargeStraight();
         System.out.println("Test Large Straight scoring passed");
+        testFullHouse();
+        System.out.println("Test Full House scoring passed");
+        testYahtzee();
+        System.out.println("Test Yahtzee scoring passed");
+        testChance();
+        System.out.println("Test Chance scoring passed");
     }
     public void testOnes(){
         int expectedScore;
@@ -209,13 +215,13 @@ public class ScoreCardTest {
     public void testFullHouse(){
         for(int[] dices : testDices){
             int expectedScore;
-            expectedScore = calculateScore(dices, scoreType.LargeStraight);
+            expectedScore = calculateScore(dices, scoreType.FullHouse);
             sc.score(dices, 10);
             try{
                 Assert.assertEquals(expectedScore, sc.lowerSection[4]);
             }
             catch (AssertionError e){
-                System.out.println("Error when testing scoring in Large Straight\n"+
+                System.out.println("Error when testing scoring in Full House\n"+
                         "Expected: " + expectedScore + "\n"+
                         "Actual: " + sc.lowerSection[4]);
             };
@@ -226,13 +232,13 @@ public class ScoreCardTest {
     public void testYahtzee(){
         for(int[] dices : testDices){
             int expectedScore;
-            expectedScore = calculateScore(dices, scoreType.LargeStraight);
+            expectedScore = calculateScore(dices, scoreType.Yahtzee);
             sc.score(dices, 11);
             try{
                 Assert.assertEquals(expectedScore, sc.lowerSection[5]);
             }
             catch (AssertionError e){
-                System.out.println("Error when testing scoring in Large Straight\n"+
+                System.out.println("Error when testing scoring in Yahtzee\n"+
                         "Expected: " + expectedScore + "\n"+
                         "Actual: " + sc.lowerSection[5]);
             };
@@ -243,13 +249,13 @@ public class ScoreCardTest {
     public void testChance(){
         for(int[] dices : testDices){
             int expectedScore;
-            expectedScore = calculateScore(dices, scoreType.LargeStraight);
+            expectedScore = calculateScore(dices, scoreType.Chance);
             sc.score(dices, 12);
             try{
                 Assert.assertEquals(expectedScore, sc.lowerSection[6]);
             }
             catch (AssertionError e){
-                System.out.println("Error when testing scoring in Large Straight\n"+
+                System.out.println("Error when testing scoring in Chance\n"+
                         "Expected: " + expectedScore + "\n"+
                         "Actual: " + sc.lowerSection[6]);
             };
@@ -356,7 +362,6 @@ public class ScoreCardTest {
                 Arrays.sort(dices);
                 int first = 0;
                 int second = 0;
-                int counter = 1;
                 int head = dices[0];
                 int tail = dices[dices.length - 1];
 

@@ -17,7 +17,7 @@ public class ScoreCard {
     public ScoreCard(){
         //Initial all score to -1 (-1 means no score recorded yet)
         upperSection = new int[]{-1, -1, -1, -1, -1, -1};
-        lowerSection = new int[]{-1, -1, -1, -1, -1, -1};
+        lowerSection = new int[]{-1, -1, -1, -1, -1, -1, -1};
     }
 
     public void score(int[] dices, int category){
@@ -31,6 +31,12 @@ public class ScoreCard {
             scoreSmallStraight(dices);
         else if(category==9)
             scoreLargeStraight(dices);
+        else if(category==10)
+            scoreFullHouse(dices);
+        else if(category==11)
+            scoreYahtzee(dices);
+        else if(category==12)
+            scoreChance(dices);
     }
 
     private void scoreUppers(int[] dices, int category){
@@ -118,5 +124,46 @@ public class ScoreCard {
             }
         }
         lowerSection[3] = 0;
+    }
+
+    private void scoreFullHouse(int[] dices){
+        Arrays.sort(dices);
+        int first = 0;
+        int second = 0;
+        int head = dices[0];
+        int tail = dices[dices.length-1];
+
+        for(int i = 0; i < dices.length; i++) {
+            if(dices[i] == head)
+                first++;
+            else if(dices[i] == tail)
+                second++;
+        }
+
+        if((first == 2 && second == 3) || (first == 3 && second == 2)) {
+            lowerSection[4] = 25;
+            return;
+        }
+        lowerSection[4] = 0;
+    }
+
+    private void scoreYahtzee(int[] dices){
+        Arrays.sort(dices);
+        int counter = 1;
+        for(int i = 0; i < dices.length-1; i++) {
+            if(dices[i+1] == dices[i])
+                counter++;
+            else
+                counter = 1;
+            if(counter == 5) {
+                lowerSection[5] = 50;
+                return;
+            }
+        }
+        lowerSection[5] = 0;
+    }
+
+    private void scoreChance(int[] dices){
+        lowerSection[6] = Arrays.stream(dices).sum();
     }
 }
