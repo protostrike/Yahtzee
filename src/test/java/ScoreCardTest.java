@@ -25,6 +25,10 @@ public class ScoreCardTest {
         testFives();
         testSixes();
         System.out.println("Test upper section scoring passed");
+        testThreeOfAKind();
+        System.out.println("Test Three Of A Kind scoring passed");
+        testFourOfAKind();
+        System.out.println("Test Four Of A Kind scoring passed");
     }
     public void testOnes(){
         int expectedScore;

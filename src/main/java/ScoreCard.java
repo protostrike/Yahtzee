@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 public class ScoreCard {
 
     /*Upper section
@@ -21,6 +23,10 @@ public class ScoreCard {
     public void score(int[] dices, int category){
         if(category<=5)
             scoreUppers(dices, category);
+        else if(category==6)
+            scoreThreeOfAKind(dices);
+        else if(category==7)
+            scoreFourOfAKind(dices);
     }
 
     private void scoreUppers(int[] dices, int category){
@@ -38,5 +44,37 @@ public class ScoreCard {
             //If no score is in, make it a 0
             upperSection[category] = 0;
         }
+    }
+
+    private void scoreThreeOfAKind(int[] dices){
+        Arrays.sort(dices);
+        int counter = 1;
+        for(int i = 0; i < dices.length-1; i++) {
+            if(dices[i+1] == dices[i])
+                counter++;
+            else
+                counter = 1;
+            if(counter == 3) {
+                lowerSection[0] = Arrays.stream(dices).sum();
+                return;
+            }
+        }
+        lowerSection[0] = 0;
+    }
+
+    private void scoreFourOfAKind(int[] dices){
+        Arrays.sort(dices);
+        int counter = 1;
+        for(int i = 0; i < dices.length-1; i++) {
+            if(dices[i+1] == dices[i])
+                counter++;
+            else
+                counter = 1;
+            if(counter == 4) {
+                lowerSection[1] = Arrays.stream(dices).sum();
+                return;
+            }
+        }
+        lowerSection[1] = 0;
     }
 }
