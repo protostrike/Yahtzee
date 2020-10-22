@@ -207,16 +207,54 @@ public class ScoreCardTest {
     }
 
     public void testFullHouse(){
-
-        return;
+        for(int[] dices : testDices){
+            int expectedScore;
+            expectedScore = calculateScore(dices, scoreType.LargeStraight);
+            sc.score(dices, 10);
+            try{
+                Assert.assertEquals(expectedScore, sc.lowerSection[4]);
+            }
+            catch (AssertionError e){
+                System.out.println("Error when testing scoring in Large Straight\n"+
+                        "Expected: " + expectedScore + "\n"+
+                        "Actual: " + sc.lowerSection[4]);
+            };
+            sc.lowerSection[4] = 0;
+        }
     }
 
     public void testYahtzee(){
-
+        for(int[] dices : testDices){
+            int expectedScore;
+            expectedScore = calculateScore(dices, scoreType.LargeStraight);
+            sc.score(dices, 11);
+            try{
+                Assert.assertEquals(expectedScore, sc.lowerSection[5]);
+            }
+            catch (AssertionError e){
+                System.out.println("Error when testing scoring in Large Straight\n"+
+                        "Expected: " + expectedScore + "\n"+
+                        "Actual: " + sc.lowerSection[5]);
+            };
+            sc.lowerSection[5] = 0;
+        }
         return;
     }
     public void testChance(){
-
+        for(int[] dices : testDices){
+            int expectedScore;
+            expectedScore = calculateScore(dices, scoreType.LargeStraight);
+            sc.score(dices, 12);
+            try{
+                Assert.assertEquals(expectedScore, sc.lowerSection[6]);
+            }
+            catch (AssertionError e){
+                System.out.println("Error when testing scoring in Large Straight\n"+
+                        "Expected: " + expectedScore + "\n"+
+                        "Actual: " + sc.lowerSection[6]);
+            };
+            sc.lowerSection[6] = 0;
+        }
         return;
     }
 
@@ -313,6 +351,43 @@ public class ScoreCardTest {
                         break;
                     }
                 }
+                break;
+            case FullHouse:
+                Arrays.sort(dices);
+                int first = 0;
+                int second = 0;
+                int counter = 1;
+                int head = dices[0];
+                int tail = dices[dices.length - 1];
+
+                for (int i = 0; i < dices.length; i++) {
+                    if (dices[i] == head)
+                        first++;
+                    else if (dices[i] == tail)
+                        second++;
+                }
+
+                if ((first == 2 && second == 3) || (first == 3 && second == 2)){
+                    finalScore = 25;
+                    break;
+                }
+                break;
+            case Yahtzee:
+                Arrays.sort(dices);
+                count = 1;
+                for(int i = 0; i < dices.length-1; i++){
+                    if(dices[i]==dices[i+1])
+                        count++;
+                    else
+                        count=1;
+                    if(count==5){
+                        finalScore = 50;
+                        break;
+                    }
+                }
+                break;
+            case Chance:
+                finalScore = Arrays.stream(dices).sum();
                 break;
         }
         return finalScore;
