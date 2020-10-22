@@ -29,6 +29,10 @@ public class ScoreCardTest {
         System.out.println("Test Three Of A Kind scoring passed");
         testFourOfAKind();
         System.out.println("Test Four Of A Kind scoring passed");
+        testSmallStraight();
+        System.out.println("Test Small Straight scoring passed");
+        testLargeStraight();
+        System.out.println("Test Small Straight scoring passed");
     }
     public void testOnes(){
         int expectedScore;
@@ -166,18 +170,47 @@ public class ScoreCardTest {
         }
         return;
     }
+
+    public void testSmallStraight(){
+        for(int[] dices : testDices){
+            int expectedScore;
+            expectedScore = calculateScore(dices, scoreType.SmallStraight);
+            sc.score(dices, 8);
+            try{
+                Assert.assertEquals(expectedScore, sc.lowerSection[2]);
+            }
+            catch (AssertionError e){
+                System.out.println("Error when testing scoring in Small Straight\n"+
+                        "Expected: " + expectedScore + "\n"+
+                        "Actual: " + sc.lowerSection[2]);
+            };
+            sc.lowerSection[2] = 0;
+        }
+        return;
+    }
+    public void testLargeStraight(){
+        for(int[] dices : testDices){
+            int expectedScore;
+            expectedScore = calculateScore(dices, scoreType.LargeStraight);
+            sc.score(dices, 9);
+            try{
+                Assert.assertEquals(expectedScore, sc.lowerSection[3]);
+            }
+            catch (AssertionError e){
+                System.out.println("Error when testing scoring in Large Straight\n"+
+                        "Expected: " + expectedScore + "\n"+
+                        "Actual: " + sc.lowerSection[3]);
+            };
+            sc.lowerSection[3] = 0;
+        }
+        return;
+    }
+
     public void testFullHouse(){
 
         return;
     }
-    public void testSmallStraight(){
 
-        return;
-    }
-    public void testLargeStraight(){
-
-        return;
-    }
     public void testYahtzee(){
 
         return;
@@ -249,6 +282,34 @@ public class ScoreCardTest {
                         count=1;
                     if(count==4){
                         finalScore = Arrays.stream(dices).sum();
+                        break;
+                    }
+                }
+                break;
+            case SmallStraight:
+                Arrays.sort(dices);
+                count = 1;
+                for(int i = 0; i < dices.length-1; i++) {
+                    if (dices[i]+1 == dices[i + 1])
+                        count++;
+                    else
+                        count = 1;
+                    if(count==4){
+                        finalScore = 30;
+                        break;
+                    }
+                }
+                break;
+            case LargeStraight:
+                Arrays.sort(dices);
+                count = 1;
+                for(int i = 0; i < dices.length-1; i++) {
+                    if (dices[i]+1 == dices[i + 1])
+                        count++;
+                    else
+                        count = 1;
+                    if(count==5){
+                        finalScore = 30;
                         break;
                     }
                 }
