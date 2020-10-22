@@ -32,7 +32,7 @@ public class ScoreCardTest {
         testSmallStraight();
         System.out.println("Test Small Straight scoring passed");
         testLargeStraight();
-        System.out.println("Test Small Straight scoring passed");
+        System.out.println("Test Large Straight scoring passed");
     }
     public void testOnes(){
         int expectedScore;
@@ -309,7 +309,7 @@ public class ScoreCardTest {
                     else
                         count = 1;
                     if(count==5){
-                        finalScore = 30;
+                        finalScore = 40;
                         break;
                     }
                 }

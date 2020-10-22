@@ -27,6 +27,10 @@ public class ScoreCard {
             scoreThreeOfAKind(dices);
         else if(category==7)
             scoreFourOfAKind(dices);
+        else if(category==8)
+            scoreSmallStraight(dices);
+        else if(category==9)
+            scoreLargeStraight(dices);
     }
 
     private void scoreUppers(int[] dices, int category){
@@ -76,5 +80,43 @@ public class ScoreCard {
             }
         }
         lowerSection[1] = 0;
+    }
+
+    private void scoreSmallStraight(int[] dices){
+        Arrays.sort(dices);
+        int counter = 1;
+
+        for(int i = 0; i < dices.length-1; i++) {
+            if(dices[i+1] == dices[i]+1)
+                counter++;
+            else if(dices[i+1] == dices[i])
+                continue;
+            else
+                counter = 1;
+            if(counter == 4) {
+                lowerSection[2] = 30;
+                return;
+            }
+        }
+        lowerSection[2] = 0;
+    }
+
+    private void scoreLargeStraight(int[] dices){
+        Arrays.sort(dices);
+        int counter = 1;
+
+        for(int i = 0; i < dices.length-1; i++) {
+            if(dices[i+1] == dices[i]+1)
+                counter++;
+            else if(dices[i+1] == dices[i])
+                continue;
+            else
+                counter = 1;
+            if(counter == 5) {
+                lowerSection[3] = 40;
+                return;
+            }
+        }
+        lowerSection[3] = 0;
     }
 }
