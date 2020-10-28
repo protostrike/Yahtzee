@@ -166,4 +166,18 @@ public class ScoreCard {
     private void scoreChance(int[] dices){
         lowerSection[6] = Arrays.stream(dices).sum();
     }
+
+    public int calculateTotalScore(){
+        int total = 0;
+        for(int score:lowerSection){
+            if(score!=-1)
+                total += score;
+        }
+        for(int score:upperSection){
+            if(score!=-1)
+                total += score;
+        }
+
+        return total;
+    }
 }
