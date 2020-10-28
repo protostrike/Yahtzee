@@ -180,4 +180,11 @@ public class ScoreCard {
 
         return total;
     }
+
+    public int getScoreByCategory(int category){
+        if(category<=5)
+            return upperSection[category];
+        else
+            return lowerSection[category-6];
+    }
 }
