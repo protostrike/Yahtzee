@@ -22,7 +22,7 @@ public class PlayerSimulateTest {
         Player player = lcOne.players[0];
 
         int roundCount = 1;
-        while(roundCount < 13){
+        while(roundCount <= 13){
             String str = "skip\n" + roundCount + "\n";
             System.out.println("Test String: \n" + str);
             addInput(str, lcOne);
@@ -38,7 +38,7 @@ public class PlayerSimulateTest {
         Player P2 = lcTwo.players[1];
 
         int roundCount = 1;
-        while(roundCount < 13){
+        while(roundCount <= 13){
             String strOne = "skip\n" + roundCount + "\n";
             String strTwo = "1 3 5\nskip\n" + roundCount + "\n";
             addInput(strOne,lcTwo);

@@ -10,12 +10,20 @@ public class ScoreCard {
         index 4: Fives
         index 5: Sixes
      */
+    String name;
     int[] upperSection;
     int upperBonus = 0;
     int yahtzeeBonus = 0;
     int[] lowerSection;
 
     public ScoreCard(){
+        //Initial all score to -1 (-1 means no score recorded yet)
+        upperSection = new int[]{-1, -1, -1, -1, -1, -1};
+        lowerSection = new int[]{-1, -1, -1, -1, -1, -1, -1};
+    }
+
+    public ScoreCard(String name){
+        this.name = name;
         //Initial all score to -1 (-1 means no score recorded yet)
         upperSection = new int[]{-1, -1, -1, -1, -1, -1};
         lowerSection = new int[]{-1, -1, -1, -1, -1, -1, -1};
@@ -38,7 +46,7 @@ public class ScoreCard {
             scoreYahtzee(dices);
         else if(category==12)
             scoreChance(dices);
-        if(checkYahtzeeBonus(dices)==true)
+        if(checkYahtzeeBonus(dices))
             yahtzeeBonus += 100;
     }
 
@@ -158,7 +166,7 @@ public class ScoreCard {
             if(dices[i+1] == dices[i])
                 counter++;
             else
-                counter = 1;
+                break;
             if(counter == 5) {
                 lowerSection[5] = 50;
                 return;
@@ -215,6 +223,7 @@ public class ScoreCard {
             dashes.append("-");
 
         StringBuilder firstLine = new StringBuilder();
+        firstLine.append("| Name: ").append(name);
         for(int i = firstLine.length(); i < 30; i++) {
             firstLine.append(" ");
         }
@@ -303,14 +312,14 @@ public class ScoreCard {
             fourthLine.append("| (11) Full House: ");
         else
             fourthLine.append("| (11) Full House: ").append(lowerSection[4]);
-        if(lowerSection[6]==-1)
+        if(lowerSection[5]==-1)
             fourthLine.append("| (12) Yahtzee: ");
         else
-            fourthLine.append("| (12) Yahtzee: ").append(lowerSection[6]);
-        if(lowerSection[5]==-1)
+            fourthLine.append("| (12) Yahtzee: ").append(lowerSection[5]);
+        if(lowerSection[6]==-1)
             fourthLine.append("| (13) Chance: ");
         else
-            fourthLine.append("| (13) Chance: ").append(lowerSection[5]);
+            fourthLine.append("| (13) Chance: ").append(lowerSection[6]);
         for(int i = fourthLine.length(); i < 60; i++)
             fourthLine.append(" ");
         fourthLine.append("| Yahtzee Bonus: ").append(yahtzeeBonus);
