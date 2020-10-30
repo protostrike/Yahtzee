@@ -15,6 +15,7 @@ public class PlayerSimulateTest {
     @Test
     public void test(){
         testOnePlayer();
+        testTwoPlayers();
     }
 
     public void testOnePlayer(){
@@ -22,26 +23,35 @@ public class PlayerSimulateTest {
 
         int roundCount = 1;
         while(roundCount < 13){
-            String str = "skip\n";
-            str += roundCount + "\n";
+            String str = "skip\n" + roundCount + "\n";
             System.out.println("Test String: \n" + str);
             addInput(str, lcOne);
             lcOne.playRound(player);
             roundCount++;
         }
-        System.out.println("\nSimulation test ends, getting player's acore card now");
+        System.out.println("\nSimulation test ends, getting player's score card now");
         System.out.println(player.card);
     }
 
     public void testTwoPlayers(){
         Player P1 = lcTwo.players[0];
         Player P2 = lcTwo.players[1];
+
         int roundCount = 1;
         while(roundCount < 13){
+            String strOne = "skip\n" + roundCount + "\n";
+            String strTwo = "1 3 5\nskip\n" + roundCount + "\n";
+            addInput(strOne,lcTwo);
             lcTwo.playRound(P1);
+            addInput(strTwo, lcTwo);
             lcTwo.playRound(P2);
             roundCount++;
         }
+        System.out.println("\nSimulation test ends, getting player's score card now");
+        System.out.println("Player 1's card:");
+        System.out.println(P1.card);
+        System.out.println("Player 2's card:");
+        System.out.println(P2.card);
     }
 
     private void addInput(String str, Launcher lc){
