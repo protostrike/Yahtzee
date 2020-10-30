@@ -206,7 +206,7 @@ public class ScoreCard {
         if(category<=5)
             return upperSection[category];
         else
-            return lowerSection[category-1];
+            return lowerSection[category-6];
     }
 
     public String toString() {
@@ -274,17 +274,12 @@ public class ScoreCard {
             thirdLine.append("| (7) Three of a Kind: ");
         else
             thirdLine.append("| (7) Three of a Kind: ").append(lowerSection[0]);
-        for(int i = thirdLine.length(); i < 119; i++)
-            thirdLine.append(" ");
-        thirdLine.append("|");
-
-        StringBuilder fourthLine = new StringBuilder();
         if(lowerSection[1]==-1)
-            fourthLine.append("| (8) Four of a Kind: ");
+            thirdLine.append("| (8) Four of a Kind: ");
         else
-            fourthLine.append("| (8) Four of a Kind: ").append(lowerSection[1]);
-        for(int i = fourthLine.length(); i < 30; i++)
-            fourthLine.append(" ");
+            thirdLine.append("| (8) Four of a Kind: ").append(lowerSection[1]);
+        for(int i = thirdLine.length(); i < 30; i++)
+            thirdLine.append(" ");
         if(lowerSection[2]==-1)
             thirdLine.append("| (9) Small Straight: ");
         else
@@ -297,22 +292,27 @@ public class ScoreCard {
             thirdLine.append("| (10) Large Straight: ").append(lowerSection[3]);
         for(int i = thirdLine.length(); i < 60; i++)
             thirdLine.append(" ");
-        if(lowerSection[4]==-1)
-            thirdLine.append("| (11) Full House: ");
-        else
-            thirdLine.append("| (11) Full House: ").append(lowerSection[4]);
         for(int i = thirdLine.length(); i < 90; i++)
             thirdLine.append(" ");
+        for(int i = thirdLine.length(); i < 119; i++)
+            thirdLine.append(" ");
+        thirdLine.append("|");
+
+        StringBuilder fourthLine = new StringBuilder();
+        if(lowerSection[4]==-1)
+            fourthLine.append("| (11) Full House: ");
+        else
+            fourthLine.append("| (11) Full House: ").append(lowerSection[4]);
+        if(lowerSection[6]==-1)
+            fourthLine.append("| (12) Yahtzee: ");
+        else
+            fourthLine.append("| (12) Yahtzee: ").append(lowerSection[6]);
         if(lowerSection[5]==-1)
             fourthLine.append("| (13) Chance: ");
         else
             fourthLine.append("| (13) Chance: ").append(lowerSection[5]);
         for(int i = fourthLine.length(); i < 60; i++)
             fourthLine.append(" ");
-        if(lowerSection[6]==-1)
-            fourthLine.append("| (12) Yahtzee: ");
-        else
-            fourthLine.append("| (12) Yahtzee: ").append(lowerSection[6]);
         fourthLine.append("| Yahtzee Bonus: ").append(yahtzeeBonus);
         for(int i = fourthLine.length(); i < 90; i++)
             fourthLine.append(" ");
