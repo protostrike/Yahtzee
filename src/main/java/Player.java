@@ -40,6 +40,15 @@ public class Player {
         }
     }
 
+    public void printDices(){
+        StringBuilder str = new StringBuilder();
+        for(int dice : dices){
+            str.append(dice);
+            str.append(" ");
+        }
+        System.out.println(str);
+    }
+
     private int getScore(){
         return card.calculateTotalScore();
     }

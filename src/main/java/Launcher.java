@@ -18,8 +18,11 @@ public class Launcher {
         System.out.println("Game start with " + players.length + " player(s)");
         int roundCount = 1;
         while(roundCount < 13){
+            System.out.println("Round " + roundCount + "\n");
             for(int i = 0; i < players.length; i++){
-                System.out.println("Player " + (i+1) + "'s round");
+                System.out.println("Player " + (i+1) + "'s round\n");
+                System.out.println("Player " + (i+1) + "'s score card:");
+                System.out.println(players[i].card);
                 playRound(players[i]);
             }
             roundCount ++;
@@ -43,16 +46,22 @@ public class Launcher {
         int rerollCount = 1;
         System.out.println("Rolling dices for the first time......");
         player.rollDice();
-
         try {
             while(rerollCount < 3){
-                System.out.println("Please select which dice(s) you want to re-roll. \n" +
+                System.out.print("Current Dices: ");
+                player.printDices();
+                System.out.println("\nPlease select which dice(s) you want to hold. \n" +
                         "Enter the position of dices and split them by space, i.e. 1 3 4\n" +
-                        "Or press enter directly to skip the re-roll");
+                        "Or enter skip to skip the re-roll\n");
                 System.out.println("Re-roll left: " + (3-rerollCount));
                 String hold = br.readLine();
-                if(hold.equals(" ")){
+                if(hold.equals("skip")){
                     score(player);
+                    return;
+                }
+                else if(hold.equals("")){
+                    player.rollDice();
+                    rerollCount++;
                 }
                 else {
                     player.rollDice(hold);
@@ -60,6 +69,8 @@ public class Launcher {
                 }
             }
             System.out.println("All re-rolls are used.");
+            System.out.print("Current Dices: ");
+            player.printDices();
             score(player);
         } catch (IOException e) {
             e.printStackTrace();
