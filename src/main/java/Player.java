@@ -2,12 +2,11 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class Player {
-    ScoreCard card;
     int[] dices = new int[5];
     Scanner scanner = new Scanner(System.in);
 
     public Player(){
-        card = new ScoreCard();
+
     }
 
     public void rollDice(){
@@ -49,7 +48,4 @@ public class Player {
         System.out.println(str);
     }
 
-    private int getScore(){
-        return card.calculateTotalScore();
-    }
 }

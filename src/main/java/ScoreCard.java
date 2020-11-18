@@ -217,6 +217,18 @@ public class ScoreCard {
             return lowerSection[category-6];
     }
 
+    public boolean isAllScored(){
+        for(int i : upperSection){
+            if(i==-1)
+                return false;
+        }
+        for(int i : lowerSection){
+            if(i==-1)
+                return false;
+        }
+        return true;
+    }
+
     public String toString() {
         StringBuilder dashes = new StringBuilder();
         for(int i = 0; i< 120; i++)
@@ -332,4 +344,5 @@ public class ScoreCard {
         return dashes + "\n" + firstLine + "\n" + dashes + "\n" + secondLine + "\n" + dashes + "\n"
                 + thirdLine + "\n" + dashes + "\n" + fourthLine + "\n" + dashes + "\n\n";
     }
+
 }
