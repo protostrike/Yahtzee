@@ -9,9 +9,6 @@ public class Server {
     public List<Connection> list = new ArrayList<>();
     ServerSocket ss;
     boolean ready = false;
-    int[] dices = new int[5];
-    int rerollCounter = 0;
-
     ScoreCard card;
 
     public Server(int port) {
@@ -23,8 +20,8 @@ public class Server {
         card = new ScoreCard();
     }
 
-
     public void start() {
+
         //Thread for getting connection requests
         //For now, only three players is allowed to join this game
         Thread waitForConnection = new Thread(() -> {
@@ -33,18 +30,23 @@ public class Server {
                 System.out.println("Server start!");
                 System.out.println("Wait for client connection");
                 while(list.size() < 3 && !ready) {
-                    s = ss.accept();
-                    System.out.println("A client is trying to connect in server");
+                    try {
+                        s = ss.accept();
+                        System.out.println("A client is trying to connect in server");
 
-                    System.out.println("Initializing this player...");
-                    Connection connection = new Connection(s, list.size()+1);
-                    list.add(connection);
+                        System.out.println("Initializing this player...");
+                        Connection connection = new Connection(s, list.size() + 1);
+                        list.add(connection);
 
-                    //Start thread listening to this client
-                    listenToClient(connection);
+                        //Start thread listening to this client
+                        listenToClient(connection);
 
-                    //Give client a prompt to be ready for playing
-                    send(connection.id, "Check Ready -- Enter ready when you are ready to play");
+                        //Give client a prompt to be ready for playing
+                        send(connection.id, "Check Ready -- Enter 'ready' when you are ready to play");
+                    } catch (SocketException e){
+                        System.out.println("Socket closed...");
+                        return;
+                    }
                 }
             }
             catch (IOException e) {
@@ -56,7 +58,11 @@ public class Server {
             public synchronized void run() {
                 System.out.println("Game start");
                 while(!card.isAllScored()) {
-                    continue;
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -66,13 +72,10 @@ public class Server {
         //Wait until 3 players has joined game
         try {
             waitForConnection.join();
-
             //Wait until all clients are ready
-            while(!checkReady()){
-                System.out.println("Waiting for ready signal from all clients......");
-                Thread.sleep(1000);
-            }
-
+            System.out.println("Waiting for ready signal from all clients......");
+            while(!checkReady());
+            ready = true;
             gameEngine.start();
 
             //Wait until game ends
@@ -81,12 +84,10 @@ public class Server {
             //Then wait for 3 seconds and close ServerSocket
             Thread.sleep(3000);
             close();
-
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
-
 
     public void close() {
         try {
@@ -96,13 +97,10 @@ public class Server {
         }
     }
 
-    /*
-     * Main function for testing purpose for now
-     */
-    public static void main(String[] args) {
-        Server s = new Server(Integer.parseInt(args[0]));
-        s.start();
+    public boolean isReady(){
+        return ready;
     }
+
 
     private void send(int id, String msg) {
         for(Connection sct : list) {
@@ -133,16 +131,15 @@ public class Server {
     //Check all client's status on ready-to-play
     private boolean checkReady(){
         for(Connection c : list){
-            if(c.isReady())
+            if(!c.isReady())
                 return false;
         }
         return true;
     }
 
-    //TODO: handle scoring message and send update afterwards
     //Handle messages coming from player
     public synchronized void handleMessage(int playerID, String msg){
-        System.out.println(msg);
+        System.out.println("From Client " + playerID + ": " + msg);
         if(msg.startsWith("Category: ")){
             //Remove the prefix "Category: "
             msg = msg.substring("Category: ".length());
@@ -154,7 +151,7 @@ public class Server {
                 dices[i] = Integer.parseInt(dicesString[i]);
             }
             card.score(dices, category);
-            updateAfterScore();
+            updateAfterScore(category);
         }
         else if(msg.equals("ready")){
             list.get(playerID-1).setReady(true);
@@ -171,8 +168,16 @@ public class Server {
 
     //Update to all players after a successful scoring
     //And reset re-roll counter and scorable list
-    private void updateAfterScore(){
-        String msg = "";
+    private void updateAfterScore(int category){
+        String msg = "Update -- " + category;
         sendAll(msg);
+    }
+
+    /*
+     * Main function for testing purpose for now
+     */
+    public static void main(String[] args) {
+        Server s = new Server(Integer.parseInt(args[0]));
+        s.start();
     }
 }

@@ -18,15 +18,23 @@ import java.io.*;
 
         int rerollCounter = 1;
         Scanner scr = new Scanner(System.in);
-        List<Integer> scorableCategory = new ArrayList<>();
+        boolean[] scorableCategory = new boolean[13];
 
         //Default constructor
         public Client(){
+            for(boolean category : scorableCategory){
+                category = true;
+            }
             try {
                 ip = InetAddress.getByName(InetAddress.getLocalHost().getHostAddress());
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             }
+        }
+
+        public Client(int port){
+            this();
+            Port = port;
         }
 
         public Client(String ip){
@@ -70,22 +78,6 @@ import java.io.*;
                 e1.printStackTrace();
             }
 
-            /*
-            Thread sendMessage = new Thread(() -> {
-                while (true) {
-                    if(!isReady)
-                        continue;
-                    try {
-                        String msg = br.readLine();
-                        send(msg);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-
-
-             */
             // readMessage thread
             Thread readMessage = new Thread(new Runnable()
             {
@@ -96,7 +88,6 @@ import java.io.*;
                             // read the message sent to this client
                             String msg = in.readLine();
                             if(msg.equals("close socket")) {
-                                //sendMessage.interrupt();
                                 return;
                             }
                             else
@@ -115,21 +106,19 @@ import java.io.*;
                     }
                 }
             });
-            //sendMessage.start();
             readMessage.start();
-
             try {
                 readMessage.join();
                 close();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
         }
 
         public void close() {
             try {
                 in.close();
+                scr.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -215,13 +204,12 @@ import java.io.*;
             }
 
             //Send warning if chosen category is already scored
-            boolean isScored = checkIfScored(category);
-            while (!isScored) {
+            while (checkIfScored(category)) {
                 System.out.println("The category you entered is already scored, please choose an unscored category");
                 msg = scr.nextLine();
                 category = Integer.parseInt(msg);
             }
-            str += "Category: " + category + ", " + "Dices: " + dices;
+            str += "Category: " + category + ", " + "Dices: " + Arrays.toString(dices);
             return str;
         }
 
@@ -260,17 +248,13 @@ import java.io.*;
         //Ask server whether the category is scored
         //Return true if the category is scored
         private boolean checkIfScored(int category){
-            for(Integer i : scorableCategory){
-                if(i==category)
-                    return false;
-            }
-            return true;
+            return scorableCategory[category];
         }
 
         //Handle messages incoming from server
         private void handleMessage(String msg){
             if(msg.startsWith("Check Ready")){
-                System.out.print(msg.substring("Check Ready -- ".length()));
+                System.out.println(msg.substring("Check Ready -- ".length()));
                 handleReady();
             }
             else if(msg.startsWith("Update")){
@@ -290,10 +274,12 @@ import java.io.*;
             send(msg);
         }
 
-        //TODO:
         //Update client information based on server's message
-        private void handleUpdate(String msg){
-
+        //Message's prefix is already removed
+        private synchronized void handleUpdate(String msg){
+            //Message supposed to be the scored category
+            int category = Integer.parseInt(msg);
+            scorableCategory[category-1] = false;
         }
 
         public static void main(String[] args) {
