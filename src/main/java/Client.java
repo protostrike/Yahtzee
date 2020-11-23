@@ -6,17 +6,28 @@ import java.io.*;
     public class Client
     {
         static int Port = 5000;
-        int id;
         public BufferedReader br = new BufferedReader(new InputStreamReader((System.in)));
         public BufferedReader in;
         public PrintWriter out;
+
         public Socket s;
         public final Queue<String> logs = new ArrayDeque<>();
         public InetAddress ip;
         public String name = null;
         int[] dices = new int[5];
+
         int rerollCounter = 1;
+        Scanner scr = new Scanner(System.in);
         List<Integer> scorableCategory = new ArrayList<>();
+
+        //Default constructor
+        public Client(){
+            try {
+                ip = InetAddress.getByName(InetAddress.getLocalHost().getHostAddress());
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
+        }
 
         public Client(String ip){
             try {
@@ -26,16 +37,11 @@ import java.io.*;
             }
         }
 
-        //This constructor is only used for testing purpose
-        public Client(String ip, String name) {
+        public Client(String ip, int port) {
             this(ip);
-            this.name = name;
-        }
-
-        public Client(String ip, int port, String name) {
-            this(ip, name);
             Port = port;
         }
+
 
         public void send(String msg) {
             out.write(msg + "\n");
@@ -64,19 +70,22 @@ import java.io.*;
                 e1.printStackTrace();
             }
 
+            /*
             Thread sendMessage = new Thread(() -> {
                 while (true) {
+                    if(!isReady)
+                        continue;
                     try {
-                        //Ask user to score until game ends
-                        String msg = formMessage();
-                        out.write(msg + "\n");
-                        out.flush();
+                        String msg = br.readLine();
+                        send(msg);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
             });
 
+
+             */
             // readMessage thread
             Thread readMessage = new Thread(new Runnable()
             {
@@ -87,11 +96,11 @@ import java.io.*;
                             // read the message sent to this client
                             String msg = in.readLine();
                             if(msg.equals("close socket")) {
-                                sendMessage.interrupt();
+                                //sendMessage.interrupt();
                                 return;
                             }
                             else
-                                System.out.println(msg);
+                                handleMessage(msg);
                             //This statement should ONLY work with the constructor
                             //Client(ip, name)
                             //And should not effect other messages
@@ -106,7 +115,7 @@ import java.io.*;
                     }
                 }
             });
-            sendMessage.start();
+            //sendMessage.start();
             readMessage.start();
 
             try {
@@ -132,10 +141,11 @@ import java.io.*;
             }
         }
 
-        private String formMessage() throws IOException{
+        //Form messages for rolling dices and scoring
+        private String formScoringMessage() throws IOException{
             String str = "";
             System.out.println("Enter anything to start rolling dices");
-            if (br.readLine() != null)
+            if (scr.nextLine() != null)
                 rollDice();
             while (rerollCounter < 3) {
                 //Conditional statement to proceed player's choice
@@ -151,12 +161,12 @@ import java.io.*;
                     System.out.println("Reroll(s) left: " + (3 - rerollCounter));
 
                     //Waiting for current player's input
-                    String msg = br.readLine();
+                    String msg = scr.nextLine();
                     switch (msg) {
                         case "1":
                             //re-roll some dices
                             System.out.println("Please enter in the dice position that you want to hold. Please seperate each number with <<Space>>");
-                            msg = br.readLine();
+                            msg = scr.nextLine();
                             rollDice(msg);
 
                             //re-roll counter reaches limit
@@ -194,13 +204,13 @@ import java.io.*;
             }
             System.out.println("Which category do you want to score? Please enter the number of a category");
 
-            String msg = br.readLine();
+            String msg = scr.nextLine();
             int category = Integer.parseInt(msg);
 
             //Send warning if category number is invalid
             while (category < 1 || category > 13) {
                 System.out.println("The category you chose is invalid, please enter a number from 1 to 13");
-                msg = br.readLine();
+                msg = scr.nextLine();
                 category = Integer.parseInt(msg);
             }
 
@@ -208,7 +218,7 @@ import java.io.*;
             boolean isScored = checkIfScored(category);
             while (!isScored) {
                 System.out.println("The category you entered is already scored, please choose an unscored category");
-                msg = br.readLine();
+                msg = scr.nextLine();
                 category = Integer.parseInt(msg);
             }
             str += "Category: " + category + ", " + "Dices: " + dices;
@@ -257,10 +267,46 @@ import java.io.*;
             return true;
         }
 
+        //Handle messages incoming from server
+        private void handleMessage(String msg){
+            if(msg.startsWith("Check Ready")){
+                System.out.print(msg.substring("Check Ready -- ".length()));
+                handleReady();
+            }
+            else if(msg.startsWith("Update")){
+                msg = msg.substring("Update -- ".length());
+                System.out.println(msg);
+                handleUpdate(msg);
+            }
+        }
+
+        //Read user input for game ready status
+        private void handleReady(){
+            String msg = scr.nextLine();
+            while(!msg.equals("ready")){
+                System.out.println("Invalid input, please enter 'ready' when you are ready to play");
+                msg = scr.nextLine();
+            }
+            send(msg);
+        }
+
+        //TODO:
+        //Update client information based on server's message
+        private void handleUpdate(String msg){
+
+        }
+
         public static void main(String[] args) {
-            Client c = new Client(args[0]);
-            Port = Integer.parseInt(args[1]);
+            Client c;
+            if(args[0].equals("5000")) {
+                c = new Client("127.0.0.1", 5000);
+            }
+            else {
+                c = new Client(args[0]);
+                Port = Integer.parseInt(args[1]);
+            }
             c.start();
         }
+
     }
 

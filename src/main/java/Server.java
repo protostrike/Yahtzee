@@ -1,13 +1,12 @@
 //A Java program for a Server 
 import java.net.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.io.*;
 
 public class Server {
     //initialize socket and input stream
-    public List<ServerClientThread> list = new ArrayList<>();
+    public List<Connection> list = new ArrayList<>();
     ServerSocket ss;
     boolean ready = false;
     int[] dices = new int[5];
@@ -38,11 +37,14 @@ public class Server {
                     System.out.println("A client is trying to connect in server");
 
                     System.out.println("Initializing this player...");
-                    ServerClientThread sct = new ServerClientThread(s, this);
-                    list.add(sct);
-                    //Start thread to this client
-                    sct.start();
-                    checkReady();
+                    Connection connection = new Connection(s, list.size()+1);
+                    list.add(connection);
+
+                    //Start thread listening to this client
+                    listenToClient(connection);
+
+                    //Give client a prompt to be ready for playing
+                    send(connection.id, "Check Ready -- Enter ready when you are ready to play");
                 }
             }
             catch (IOException e) {
@@ -53,22 +55,27 @@ public class Server {
         Thread gameEngine = new Thread(new Runnable() {
             public synchronized void run() {
                 System.out.println("Game start");
-                while(card.isAllScored()) {
+                while(!card.isAllScored()) {
                     continue;
                 }
-
             }
         });
 
         //Start waiting for connection
         waitForConnection.start();
-
         //Wait until 3 players has joined game
         try {
             waitForConnection.join();
-            //Wait for ready signal
+
+            //Wait until all clients are ready
+            while(!checkReady()){
+                System.out.println("Waiting for ready signal from all clients......");
+                Thread.sleep(1000);
+            }
+
             gameEngine.start();
 
+            //Wait until game ends
             gameEngine.join();
             //After game is complete, close all clients
             //Then wait for 3 seconds and close ServerSocket
@@ -82,10 +89,6 @@ public class Server {
 
 
     public void close() {
-        for(ServerClientThread sct : list) {
-            sct.close();
-            sct.interrupt();
-        }
         try {
             ss.close();
         } catch (IOException e) {
@@ -101,59 +104,45 @@ public class Server {
         s.start();
     }
 
-    //Getter function to retrieve player thread by given name
-    private ServerClientThread getPlayer(int id) {
-        for(ServerClientThread sct : list) {
-            if(sct.id==id)
-                return sct;
-        }
-        System.out.println("Client " + id + " Cannot be found");
-        return null;
-    }
-
-    private void checkReady() {
-        for(int i = 0; i < list.size(); i++) {
-            if(i == 0) {
-                send(list.get(i).id, "Currently " + list.size() + " player(s) in lobby, do you want to start game now?\n"
-                        + "Enter 'yes' or 'no'");
-            }
-            else
-                send(list.get(i).id, "Waiting for Player one's response");
-        }
-        //Waiting for ready signal from player 1
-        try {
-            String msg = list.get(0).in.readLine();
-            if(msg.equals("yes")) {
-                ready = true;
-            }
-            else {
-                for(int i = 0; i < list.size(); i++) {
-                    if(i == 0) {
-                        send(list.get(i).id, "OK, waiting for more players");
-                    }
-                    else
-                        send(list.get(i).id, "Player one wants more players");
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void send(int id, String msg) {
-        for(ServerClientThread sct : list) {
+        for(Connection sct : list) {
             if(sct.getPlayerId()==id)
                 sct.send(msg);
         }
     }
 
     private void sendAll(String msg) {
-        for(ServerClientThread sct : list) {
+        for(Connection sct : list) {
             sct.send(msg);
         }
     }
+
+    private void listenToClient(Connection connection){
+        new Thread(() -> {
+            while(true){
+                try {
+                    String msg = connection.in.readLine();
+                    handleMessage(connection.id, msg);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    //Check all client's status on ready-to-play
+    private boolean checkReady(){
+        for(Connection c : list){
+            if(c.isReady())
+                return false;
+        }
+        return true;
+    }
+
+    //TODO: handle scoring message and send update afterwards
     //Handle messages coming from player
     public synchronized void handleMessage(int playerID, String msg){
+        System.out.println(msg);
         if(msg.startsWith("Category: ")){
             //Remove the prefix "Category: "
             msg = msg.substring("Category: ".length());
@@ -167,10 +156,19 @@ public class Server {
             card.score(dices, category);
             updateAfterScore();
         }
+        else if(msg.equals("ready")){
+            list.get(playerID-1).setReady(true);
+        }
         else{
             System.out.println("Anonymous input, ignore");
         }
     }
+
+    //Getter for connection
+    public Connection getConnection(int id){
+        return list.get(id-1);
+    }
+
     //Update to all players after a successful scoring
     //And reset re-roll counter and scorable list
     private void updateAfterScore(){

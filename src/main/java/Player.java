@@ -1,9 +1,7 @@
 import java.util.Arrays;
-import java.util.Scanner;
 
 public class Player {
     int[] dices = new int[5];
-    Scanner scanner = new Scanner(System.in);
 
     public Player(){
 
@@ -37,15 +35,6 @@ public class Player {
             else
                 dices[i] = (int) Math.ceil(Math.random()*6);
         }
-    }
-
-    public void printDices(){
-        StringBuilder str = new StringBuilder();
-        for(int dice : dices){
-            str.append(dice);
-            str.append(" ");
-        }
-        System.out.println(str);
     }
 
 }
