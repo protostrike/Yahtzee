@@ -6,12 +6,10 @@ import java.io.*;
     public class Client
     {
         static int Port = 5000;
-        public BufferedReader br = new BufferedReader(new InputStreamReader((System.in)));
-        public BufferedReader in;
-        public PrintWriter out;
-
-        public Socket s;
-        public final Queue<String> logs = new ArrayDeque<>();
+        BufferedReader in;
+        PrintWriter out;
+        Socket s;
+        Thread readMessage;
         public InetAddress ip;
         public String name = null;
         int[] dices = new int[5];
@@ -56,17 +54,6 @@ import java.io.*;
             out.flush();
         }
 
-        public boolean receive(String msg) {
-            synchronized(logs) {
-                for(String line : logs) {
-                    if(line.equals(msg)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
         public void start() {
             // obtaining input and out streams
             // sendMessage thread
@@ -79,7 +66,7 @@ import java.io.*;
             }
 
             // readMessage thread
-            Thread readMessage = new Thread(new Runnable()
+            readMessage = new Thread(new Runnable()
             {
                 @Override
                 public synchronized void run() {
@@ -111,7 +98,8 @@ import java.io.*;
                 readMessage.join();
                 close();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                System.out.println("Thread interrupted, closing now");
+                close();
             }
         }
 
