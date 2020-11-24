@@ -11,6 +11,7 @@ public class Server {
     ServerSocket ss;
     Thread waitForConnection;
     Thread gameEngine;
+    boolean up = false;
     boolean ready = false;
     ScoreCard card;
 
@@ -72,6 +73,10 @@ public class Server {
 
         //Start waiting for connection
         waitForConnection.start();
+
+        //Indicating the server is up
+        up = true;
+
         //Wait until 3 players has joined game
         try {
             waitForConnection.join();

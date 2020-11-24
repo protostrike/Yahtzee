@@ -10,6 +10,7 @@ import java.io.*;
         PrintWriter out;
         Socket s;
         Thread readMessage;
+        boolean up = false;
         public InetAddress ip;
         public String name = null;
         int[] dices = new int[5];
@@ -94,6 +95,7 @@ import java.io.*;
                 }
             });
             readMessage.start();
+            up = true;
             try {
                 readMessage.join();
                 close();
