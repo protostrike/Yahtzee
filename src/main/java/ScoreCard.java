@@ -10,20 +10,12 @@ public class ScoreCard {
         index 4: Fives
         index 5: Sixes
      */
-    String name;
     int[] upperSection;
     int upperBonus = 0;
     int yahtzeeBonus = 0;
     int[] lowerSection;
 
     public ScoreCard(){
-        //Initial all score to -1 (-1 means no score recorded yet)
-        upperSection = new int[]{-1, -1, -1, -1, -1, -1};
-        lowerSection = new int[]{-1, -1, -1, -1, -1, -1, -1};
-    }
-
-    public ScoreCard(String name){
-        this.name = name;
         //Initial all score to -1 (-1 means no score recorded yet)
         upperSection = new int[]{-1, -1, -1, -1, -1, -1};
         lowerSection = new int[]{-1, -1, -1, -1, -1, -1, -1};
@@ -235,7 +227,7 @@ public class ScoreCard {
             dashes.append("-");
 
         StringBuilder firstLine = new StringBuilder();
-        firstLine.append("| Name: ").append(name);
+        firstLine.append("| Name: ").append("Server");
         for(int i = firstLine.length(); i < 30; i++) {
             firstLine.append(" ");
         }

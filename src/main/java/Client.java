@@ -56,8 +56,7 @@ import java.io.*;
         }
 
         public void start() {
-            // obtaining input and out streams
-            // sendMessage thread
+            // obtaining input and out streams of socket
             try {
                 s = new Socket(ip, Port);
                 in = new BufferedReader(new InputStreamReader(s.getInputStream()));

@@ -11,8 +11,8 @@ public class Server {
     ServerSocket ss;
     Thread waitForConnection;
     Thread gameEngine;
-    boolean up = false;
-    boolean ready = false;
+    boolean up;
+    boolean ready;
     ScoreCard card;
 
     public Server(int port) {
@@ -82,7 +82,9 @@ public class Server {
             waitForConnection.join();
             //Wait until all clients are ready
             System.out.println("Waiting for ready signal from all clients......");
-            while (!checkReady()) ;
+            while (!checkReady()){
+                Thread.sleep(100);
+            }
             ready = true;
             gameEngine.start();
 
@@ -154,16 +156,21 @@ public class Server {
             return;
         System.out.println("From Client " + playerID + ": " + msg);
         if (msg.startsWith("Category: ")) {
+            if(!isReady()){
+                System.out.println("Game is not ready yet, ignore this message");
+                return;
+            }
             //Remove the prefix "Category: "
             msg = msg.substring("Category: ".length());
-            int category = msg.charAt(0);
+            int category = Character.getNumericValue(msg.charAt(0));
             msg = msg.substring(3).substring("Dices: ".length());
             String[] dicesString = msg.substring(1, msg.length() - 1).split(",");
             int[] dices = new int[5];
             for (int i = 0; i < dicesString.length; i++) {
                 dices[i] = Integer.parseInt(dicesString[i]);
             }
-            card.score(dices, category);
+            System.out.println("Scoring now in category " + category);
+            card.score(dices, category-1);
             updateAfterScore(category);
         } else if (msg.equals("ready")) {
             list.get(playerID - 1).setReady(true);
