@@ -1,8 +1,6 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
+import java.time.LocalTime;
 
 public class Connection {
     Socket serverClient;
@@ -10,6 +8,9 @@ public class Connection {
     PrintWriter out;
     int id;
     boolean ready = false;
+
+    File log = new File("./log.txt");
+    FileWriter logWriter;
 
     public Connection(Socket s, int id) {
         try {
@@ -20,9 +21,15 @@ public class Connection {
         }
         this.serverClient = s;
         this.id = id;
+        try {
+            logWriter = new FileWriter(log.getAbsoluteFile(), true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public synchronized void send(String msg) {
+    public void send(String msg) {
+        System.out.println("Send to Client:" + msg);
         out.write(msg + "\n");
         out.flush();
     }
@@ -37,5 +44,24 @@ public class Connection {
 
     public void setReady(boolean ready){
         this.ready = ready;
+        logging("Client ready");
+    }
+
+    public void close(){
+        try {
+            logWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void logging(String str){
+        try {
+            str = "[" + LocalTime.now() + "]Client " + id +": "+ str + "\n";
+            logWriter.write(str);
+            logWriter.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -1,23 +1,29 @@
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
 public class SimulationTest {
     Server s;
     Client c1;
     Client c2;
     Client c3;
+    File log = new File("./log.txt").getAbsoluteFile();
 
     @Test
     public void test() {
         testOnePlayerReady();
         sleep(1000);
         testServerReady();
+        sleep(1000);
+        testScoringFromOnePlayer();
     }
-
 
     //Test case: test player's ready status after one player connected to server
     public void testOnePlayerReady() {
-        System.out.println("\nTest Case: Test Player Ready\n");
+        System.out.println("\nTest Case: Test one player ready status\n");
         //Construct server and client
         s = new Server(5000);
         c1 = new Client();
@@ -37,12 +43,12 @@ public class SimulationTest {
 
         //Send ready message from client 1 to server
         sendMessage("ready", c1);
+        sleep(1000);
         try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            Assert.assertTrue(containLog("Client 1: Client ready"));
+        } catch (AssertionError e){
+            System.out.println("Client cannot enter ready status");
         }
-        Assert.assertTrue(s.getConnection(1).isReady());
         System.out.println("Test passed");
         server.interrupt();
         client1.interrupt();
@@ -50,7 +56,7 @@ public class SimulationTest {
 
     //Test case: test server's ready status after all three players are ready
     public void testServerReady(){
-        System.out.println("\nTest Case: Test Server Ready\n");
+        System.out.println("\nTest Case: Test Server ready status\n");
         //Construct server and client
         s = new Server(5001);
         c1 = new Client(5001);
@@ -80,9 +86,13 @@ public class SimulationTest {
 
         //Wait until all three players are ready
         waitForAllClientsReady();
-
-        Assert.assertTrue(s.isReady());
-        System.out.println("Test passed");
+        sleep(2000);
+        try {
+            Assert.assertTrue(containLog("Game start"));
+        } catch (AssertionError e){
+            System.out.println("Server cannot enter ready status after all clients are ready");
+        }
+        System.out.println("Test Server ready status passed");
 
         //Shut down thread after test
         server.interrupt();
@@ -92,10 +102,11 @@ public class SimulationTest {
     }
 
     public void testScoringFromOnePlayer(){
+        System.out.println("\nTest case: test scoring once from one player\n");
         s = new Server(5002);
-        c1 = new Client(5002);
-        c2 = new Client(5002);
-        c3 = new Client(5002);
+        c1 = new Client(5002, true);
+        c2 = new Client(5002, true);
+        c3 = new Client(5002, true);
 
         //Start server
         Thread server = new Thread(() -> s.start());
@@ -117,16 +128,24 @@ public class SimulationTest {
         sendMessage("ready", c1);
         sendMessage("ready", c2);
         sendMessage("ready", c3);
-
         //Wait until all three players are ready
-        waitForAllClientsReady();
+        waitForServerReady();
 
         //Send a message from client 1 to score in Ones
         sendMessage("Category: 1, Dices: [1,1,1,1,1]", c1);
         sleep(2000);
 
-        Assert.assertEquals(s.card.getScoreByCategory(1), 5);
-        Assert.assertFalse(c1.scorableCategory[0]);
+        Assert.assertEquals(5, s.card.getScoreByCategory(0));
+        sleep(2000);
+        try {
+            Assert.assertTrue(containLog("Category index 0 is scored"));
+        } catch (AssertionError e){
+            System.out.println("Client cannot get updated message after scoring");
+        }
+    }
+
+    public void testMultiScoresFromMultiPlayer(){
+
     }
 
     private void sleep(long time){
@@ -145,11 +164,7 @@ public class SimulationTest {
     private void waitForServerUp(){
         System.out.println("Wait until server is up and running properly");
         while(!s.up){
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            sleep(1000);
             System.out.println("Still waiting...");
         }
     }
@@ -157,11 +172,7 @@ public class SimulationTest {
     private void waitForOneClientUp(Client c){
         System.out.println("Wait until the client is up and running properly");
         while(!c.up){
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            sleep(1000);
             System.out.println("Still waiting...");
         }
     }
@@ -169,11 +180,7 @@ public class SimulationTest {
     private void waitForAllClientsUp(){
         System.out.println("Wait until all clients are up and running properly");
         while(!c1.up||!c2.up||!c3.up){
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            sleep(1000);
             System.out.println("Still waiting...");
         }
     }
@@ -181,12 +188,31 @@ public class SimulationTest {
     private void waitForAllClientsReady(){
         System.out.println("Wait until all clients are ready to play");
         while(!s.getConnection(1).isReady()||!s.getConnection(2).isReady()||!s.getConnection(3).isReady()){
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            sleep(1000);
             System.out.println("Still waiting...");
         }
+    }
+
+    private void waitForServerReady(){
+        System.out.println("Wait until server is ready to play");
+        while(!s.isReady()){
+            sleep(1000);
+            System.out.println("Still waiting...");
+        }
+    }
+
+    private boolean containLog(String msg){
+        try {
+            Scanner scr = new Scanner(log);
+            while(scr.hasNextLine()){
+                String line = scr.nextLine();
+                if(line.contains(msg))
+                    return true;
+            }
+            scr.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

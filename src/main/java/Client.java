@@ -1,5 +1,6 @@
 
 import java.net.*;
+import java.time.LocalTime;
 import java.util.*;
 import java.io.*;
 
@@ -14,16 +15,20 @@ import java.io.*;
         public InetAddress ip;
         public String name = null;
         int[] dices = new int[5];
-
         int rerollCounter = 1;
+        int id = 0;
         Scanner scr = new Scanner(System.in);
         boolean[] scorableCategory = new boolean[13];
+        boolean isTest = false;
+
+        File log = new File("./log.txt");
+        FileWriter logWriter;
+
 
         //Default constructor
         public Client(){
-            for(boolean category : scorableCategory){
-                category = true;
-            }
+            //All categories should be able to score when initializing
+            Arrays.fill(scorableCategory, true);
             try {
                 ip = InetAddress.getByName(InetAddress.getLocalHost().getHostAddress());
             } catch (UnknownHostException e) {
@@ -36,7 +41,14 @@ import java.io.*;
             Port = port;
         }
 
+        public Client(int port, boolean test){
+            this();
+            Port = port;
+            isTest = test;
+        }
+
         public Client(String ip){
+            Arrays.fill(scorableCategory, true);
             try {
                 this.ip = InetAddress.getByName(ip);
             } catch (UnknownHostException e) {
@@ -49,7 +61,6 @@ import java.io.*;
             Port = port;
         }
 
-
         public void send(String msg) {
             out.write(msg + "\n");
             out.flush();
@@ -58,6 +69,7 @@ import java.io.*;
         public void start() {
             // obtaining input and out streams of socket
             try {
+                logWriter = new FileWriter(log.getAbsoluteFile(), true);
                 s = new Socket(ip, Port);
                 in = new BufferedReader(new InputStreamReader(s.getInputStream()));
                 out = new PrintWriter(s.getOutputStream());
@@ -72,20 +84,14 @@ import java.io.*;
                 public synchronized void run() {
                     try {
                         while (true) {
-                            // read the message sent to this client
+                            // read the message send to this client
                             String msg = in.readLine();
+                            System.out.println("Received from server: " + msg);
                             if(msg.equals("close socket")) {
                                 return;
                             }
                             else
                                 handleMessage(msg);
-                            //This statement should ONLY work with the constructor
-                            //Client(ip, name)
-                            //And should not effect other messages
-                            if(msg.equals("Please enter your name:") &&
-                                    name != null) {
-                                send(name);
-                            }
                         }
                     }
                     catch (IOException e) {
@@ -97,15 +103,17 @@ import java.io.*;
             up = true;
             try {
                 readMessage.join();
+                System.out.println("ends here");
                 close();
             } catch (InterruptedException e) {
-                System.out.println("Thread interrupted, closing now");
+                System.out.println("Client thread interrupted, closing now");
                 close();
             }
         }
 
         public void close() {
             try {
+                logWriter.close();
                 in.close();
                 scr.close();
             } catch (IOException e) {
@@ -243,13 +251,20 @@ import java.io.*;
         //Handle messages incoming from server
         private void handleMessage(String msg){
             if(msg.startsWith("Check Ready")){
+                logging(msg);
                 System.out.println(msg.substring("Check Ready -- ".length()));
-                handleReady();
+                if(!isTest)
+                    handleReady();
             }
             else if(msg.startsWith("Update")){
+                logging(msg);
                 msg = msg.substring("Update -- ".length());
-                System.out.println(msg);
                 handleUpdate(msg);
+            }
+            else if(msg.startsWith("Your ID is")){
+                msg = msg.substring("Your ID is: ".length());
+                logging("Received ID -- " + msg);
+                id = Character.getNumericValue(msg.charAt(0));
             }
         }
 
@@ -261,6 +276,7 @@ import java.io.*;
                 msg = scr.nextLine();
             }
             send(msg);
+            scr.close();
         }
 
         //Update client information based on server's message
@@ -269,6 +285,23 @@ import java.io.*;
             //Message supposed to be the scored category
             int category = Integer.parseInt(msg);
             scorableCategory[category-1] = false;
+            System.out.println("Category index " + (category-1) + " is scored");
+            logging("Category index " + (category-1) + " is scored");
+        }
+
+        private void logging(String str){
+            try {
+                if(id==0) {
+                    str = "[" + LocalTime.now() + "]Client: "+ str + "\n";
+                }
+                else {
+                    str = "[" + LocalTime.now() + "]Client " + id +": "+ str + "\n";
+                }
+                logWriter.write(str);
+                logWriter.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         public static void main(String[] args) {

@@ -1,6 +1,7 @@
 //A Java program for a Server 
 
 import java.net.*;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.*;
@@ -14,6 +15,8 @@ public class Server {
     boolean up;
     boolean ready;
     ScoreCard card;
+    File log;
+    FileWriter logWriter;
 
     public Server(int port) {
         try {
@@ -22,6 +25,19 @@ public class Server {
             e.printStackTrace();
         }
         card = new ScoreCard();
+        log = new File("./log.txt");
+        //Create log file
+        //And delete old one if exists
+        try {
+            if (log.getAbsoluteFile().exists()) {
+                System.out.println("Old logs detected, deleting now");
+                log.getAbsoluteFile().delete();
+            }
+            log.createNewFile();
+            logWriter = new FileWriter(log.getAbsoluteFile(), true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void start() {
@@ -30,24 +46,24 @@ public class Server {
         waitForConnection = new Thread(() -> {
             try {
                 Socket s;
-                System.out.println("Server start!");
-                System.out.println("Wait for client connection");
+                logging("==Server start==");
+                logging("Wait for client connection");
                 while (list.size() < 3 && !ready) {
                     try {
                         s = ss.accept();
-                        System.out.println("A client is trying to connect in server");
-
-                        System.out.println("Initializing this player...");
+                        logging("A client is trying to connect in the server");
                         Connection connection = new Connection(s, list.size() + 1);
                         list.add(connection);
 
                         //Start thread listening to this client
                         listenToClient(connection);
 
+                        //Send ID to client
+                        send(connection.id, "Your ID is: " + connection.id);
                         //Give client a prompt to be ready for playing
                         send(connection.id, "Check Ready -- Enter 'ready' when you are ready to play");
                     } catch (SocketException e) {
-                        System.out.println("Server Socket closed");
+                        logging("Server Socket closed, shut down connection");
                         return;
                     }
                 }
@@ -58,12 +74,12 @@ public class Server {
 
         gameEngine = new Thread(new Runnable() {
             public synchronized void run() {
-                System.out.println("Game start");
+                logging("==Game start==");
                 while (!card.isAllScored()) {
                     try {
                         wait();
                     } catch (InterruptedException e) {
-                        System.out.println("Thread interrupted, closing now");
+                        logging("Game engine thread interrupted, closing now");
                         close();
                         return;
                     }
@@ -82,7 +98,7 @@ public class Server {
             waitForConnection.join();
             //Wait until all clients are ready
             System.out.println("Waiting for ready signal from all clients......");
-            while (!checkReady()){
+            while (!checkReady()) {
                 Thread.sleep(100);
             }
             ready = true;
@@ -95,7 +111,7 @@ public class Server {
             Thread.sleep(3000);
             close();
         } catch (InterruptedException e) {
-            System.out.println("Thread interrupted, closing now");
+            logging("Main server thread interrupted, closing now");
             close();
         }
     }
@@ -105,15 +121,75 @@ public class Server {
             waitForConnection.interrupt();
             gameEngine.interrupt();
             ss.close();
+
+            //Close fileWriter after threads terminated
+            if (waitForConnection.isAlive())
+                waitForConnection.join();
+            if (gameEngine.isAlive())
+                gameEngine.join();
+            for(Connection c : list)
+                c.close();
+            logWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (InterruptedException e) {
+            //Still need to close logWriter if interrupted signal is caught
+            try {
+                logWriter.close();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
         }
     }
 
+    //Getter for ready
     public boolean isReady() {
         return ready;
     }
 
+    //Getter for connection
+    public Connection getConnection(int id) {
+        return list.get(id - 1);
+    }
+
+    //Handle messages coming from player
+    private synchronized void handleMessage(int playerID, String msg) {
+        if (msg == null)
+            return;
+        logging("From Client " + playerID + ": " + msg);
+        if (msg.startsWith("Category: ")) {
+            if (!isReady()) {
+                System.out.println("Game is not ready yet, ignore this message");
+                return;
+            }
+            //Remove the prefix "Category: "
+            msg = msg.substring("Category: ".length());
+            int category = Character.getNumericValue(msg.charAt(0));
+            msg = msg.substring(3).substring("Dices: ".length());
+            String[] dicesString = msg.substring(1, msg.length() - 1).split(",");
+            int[] dices = new int[5];
+            for (int i = 0; i < dicesString.length; i++) {
+                dices[i] = Integer.parseInt(dicesString[i]);
+            }
+            logging("Scoring now in category " + (category-1));
+            card.score(dices, category - 1);
+            updateAfterScore(category);
+        } else if (msg.equals("ready")) {
+            list.get(playerID - 1).setReady(true);
+        } else {
+            logging("Anonymous input: " + msg + ". ignore");
+        }
+    }
+
+    private void logging(String str) {
+        try {
+            str = "[" + LocalTime.now() + "]Server: " + str + "\n";
+            logWriter.write(str);
+            logWriter.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private void send(int id, String msg) {
         for (Connection sct : list) {
@@ -150,39 +226,6 @@ public class Server {
         return true;
     }
 
-    //Handle messages coming from player
-    public synchronized void handleMessage(int playerID, String msg) {
-        if(msg==null)
-            return;
-        System.out.println("From Client " + playerID + ": " + msg);
-        if (msg.startsWith("Category: ")) {
-            if(!isReady()){
-                System.out.println("Game is not ready yet, ignore this message");
-                return;
-            }
-            //Remove the prefix "Category: "
-            msg = msg.substring("Category: ".length());
-            int category = Character.getNumericValue(msg.charAt(0));
-            msg = msg.substring(3).substring("Dices: ".length());
-            String[] dicesString = msg.substring(1, msg.length() - 1).split(",");
-            int[] dices = new int[5];
-            for (int i = 0; i < dicesString.length; i++) {
-                dices[i] = Integer.parseInt(dicesString[i]);
-            }
-            System.out.println("Scoring now in category " + category);
-            card.score(dices, category-1);
-            updateAfterScore(category);
-        } else if (msg.equals("ready")) {
-            list.get(playerID - 1).setReady(true);
-        } else {
-            System.out.println("Anonymous input, ignore");
-        }
-    }
-
-    //Getter for connection
-    public Connection getConnection(int id) {
-        return list.get(id - 1);
-    }
 
     //Update to all players after a successful scoring
     //And reset re-roll counter and scorable list
