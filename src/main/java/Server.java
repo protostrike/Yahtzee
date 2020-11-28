@@ -107,6 +107,7 @@ public class Server {
 
             //Wait until game ends
             gameEngine.join();
+            logging("==Game ends==");
             //After game is complete, close all clients
             //Then wait for 3 seconds and close ServerSocket
             Thread.sleep(3000);
@@ -170,7 +171,7 @@ public class Server {
             String[] dicesString = msg.substring(1, msg.length() - 1).split(",");
             int[] dices = new int[5];
             for (int i = 0; i < dicesString.length; i++) {
-                dices[i] = Integer.parseInt(dicesString[i]);
+                dices[i] = Integer.parseInt(dicesString[i].trim());
             }
             if(card.getScoreByCategory(category-1)==-1) {
                 logging("Scoring now in category " + (category - 1));

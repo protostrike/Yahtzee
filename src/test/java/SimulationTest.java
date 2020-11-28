@@ -3,6 +3,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class SimulationTest {
@@ -19,11 +20,13 @@ public class SimulationTest {
         testServerReady();
         sleep(1000);
         testScoringFromOnePlayer();
+        sleep(1000);
+        testMultiScoresFromMultiPlayer();
     }
 
     //Test case: test player's ready status after one player connected to server
     public void testOnePlayerReady() {
-        System.out.println("\nTest Case: Test one player ready status\n");
+        System.out.println("\nTest Case: Test single player's ready status\n");
         //Construct server and client
         s = new Server(5000);
         c1 = new Client();
@@ -49,7 +52,7 @@ public class SimulationTest {
         } catch (AssertionError e){
             System.out.println("Client cannot enter ready status");
         }
-        System.out.println("Test passed");
+        System.out.println("Test single player's ready status passed");
         server.interrupt();
         client1.interrupt();
     }
@@ -104,9 +107,9 @@ public class SimulationTest {
     public void testScoringFromOnePlayer(){
         System.out.println("\nTest case: test scoring once from one player\n");
         s = new Server(5002);
-        c1 = new Client(5002, true);
-        c2 = new Client(5002, true);
-        c3 = new Client(5002, true);
+        c1 = new Client(5002);
+        c2 = new Client(5002);
+        c3 = new Client(5002);
 
         //Start server
         Thread server = new Thread(() -> s.start());
@@ -140,12 +143,74 @@ public class SimulationTest {
         try {
             Assert.assertTrue(containLog("Category index 0 is scored"));
         } catch (AssertionError e){
-            System.out.println("Client cannot get updated message after scoring");
+            Assert.fail("Client cannot get updated message after scoring");
         }
     }
 
     public void testMultiScoresFromMultiPlayer(){
+        System.out.println("\nTest case: test scoring from multiple players\n");
+        s = new Server(5003);
+        c1 = new Client(5003);
+        c2 = new Client(5003);
+        c3 = new Client(5003);
 
+        //Start server
+        Thread server = new Thread(() -> s.start());
+        server.start();
+
+        //Start client
+        Thread client1 = new Thread(() -> c1.start());
+        Thread client2 = new Thread(() -> c2.start());
+        Thread client3 = new Thread(() -> c3.start());
+
+        waitForServerUp();
+        client1.start();
+        client2.start();
+        client3.start();
+
+        waitForAllClientsUp();
+
+        //Send ready messages from all three clients
+        sendMessage("ready", c1);
+        sendMessage("ready", c2);
+        sendMessage("ready", c3);
+        //Wait until all three players are ready
+        waitForServerReady();
+
+        //Score many times from a random player each time
+        for(int i = 1; i < 10; i++){
+            int randomPick = (int)Math.ceil(Math.random()*2);
+            Client c;
+            switch (randomPick){
+                case 1:
+                    c = c1;
+                    break;
+                case 2:
+                    c = c2;
+                    break;
+                case 3:
+                    c = c3;
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + randomPick);
+            }
+            //Roll random dices
+            int[] dices = new int[5];
+            Arrays.fill(dices, (int)Math.ceil(Math.random()*5));
+
+            String str = "Category: " + i + ", Dices: " + Arrays.toString(dices);
+            System.out.println(str);
+            //Send message from player
+            sendMessage(str, c);
+            sleep(2000);
+        }
+        for(int i = 0; i < 9; i++){
+            try {
+                Assert.assertTrue(containLog("Category index " + i + " is scored"));
+            } catch (AssertionError e){
+                Assert.fail("Error: category " + i + " is not scored");
+            }
+        }
     }
 
     private void sleep(long time){
