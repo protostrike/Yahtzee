@@ -6,24 +6,42 @@ import java.io.*;
 
     public class Client
     {
+        //Basic attribute to start socket
         static int Port = 5000;
+        public InetAddress ip;
+        Socket s;
+
+        //User input reader
+        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+
+        //Used to obtain socket's input and output streams
         BufferedReader in;
         PrintWriter out;
-        Socket s;
+
+        //Declared this thread here to help on closing the client
         Thread readMessage;
-        boolean up = false;
-        public InetAddress ip;
-        public String name = null;
+        Thread userInput;
+
+        //Attributes for scoring and rolling dices
         int[] dices = new int[5];
         int rerollCounter = 1;
         int id = 0;
-        Scanner scr = new Scanner(System.in);
         boolean[] scorableCategory = new boolean[13];
-        boolean isTest = false;
 
+        //Flag variables to help on testing and determining different situations
+        boolean up = false;
+        boolean checkReady = false;
+        boolean ready = false;
+        boolean reset = false;
+
+        //Variables for logging
         File log = new File("./log.txt");
         FileWriter logWriter;
 
+        //Array contains all categories' names
+        //Used for printing information to user
+        String[] categoryNames = {"Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Three of a Kind",
+        "Four of a Kind", "Small Straight", "Large Straight", "Full House", "Yahtzee", "Chance"};
 
         //Default constructor
         public Client(){
@@ -39,12 +57,6 @@ import java.io.*;
         public Client(int port){
             this();
             Port = port;
-        }
-
-        public Client(int port, boolean test){
-            this();
-            Port = port;
-            isTest = test;
         }
 
         public Client(String ip){
@@ -66,6 +78,7 @@ import java.io.*;
             out.flush();
         }
 
+        //Main entry point of client
         public void start() {
             // obtaining input and out streams of socket
             try {
@@ -86,7 +99,6 @@ import java.io.*;
                         while (true) {
                             // read the message send to this client
                             String msg = in.readLine();
-                            System.out.println("Received from server: " + msg);
                             if(msg.equals("close socket")) {
                                 return;
                             }
@@ -100,10 +112,19 @@ import java.io.*;
                 }
             });
             readMessage.start();
+            listenToUserInput();
+            synchronized (userInput){
+                while(!isCheckReady()) {
+                    try {
+                        userInput.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
             up = true;
             try {
                 readMessage.join();
-                System.out.println("ends here");
                 close();
             } catch (InterruptedException e) {
                 System.out.println("Client thread interrupted, closing now");
@@ -115,7 +136,6 @@ import java.io.*;
             try {
                 logWriter.close();
                 in.close();
-                scr.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -127,12 +147,46 @@ import java.io.*;
             }
         }
 
+        private void listenToUserInput(){
+            userInput = new Thread(() -> {
+                try {
+                    while (true) {
+                        if(!isCheckReady())
+                            Thread.sleep(100);
+                        else{
+                            //User is now prompt to enter 'ready'
+                            String str = input.readLine();
+                            if(!str.equals("ready"))
+                                System.out.println("Invalid input, please enter 'ready' when you are ready to play");
+                        }
+                        if(checkReady&&ready){
+                            //Game is ready to go, user should be prompted to input for scoring
+                            formScoringMessage();
+                            //Check and handle reset status here
+                            if(reset){
+                                handleReset();
+                            }
+                        }
+                    }
+                }
+                catch(IOException | InterruptedException e){
+                    e.printStackTrace();
+                }
+            } );
+            userInput.start();
+        }
+
         //Form messages for rolling dices and scoring
-        private String formScoringMessage() throws IOException{
+        //Also need to check reset status after each user input
+        //Return if reset is needed or finishing up on information gathering
+        private void formScoringMessage() throws IOException{
             String str = "";
-            System.out.println("Enter anything to start rolling dices");
-            if (scr.nextLine() != null)
+            System.out.println("Enter anything and press <<Enter>> to start rolling dices");
+            if (input.readLine() != null) {
+                if(reset)
+                    return;
                 rollDice();
+            }
             while (rerollCounter < 3) {
                 //Conditional statement to proceed player's choice
                 //And give player a warning if input is invalid
@@ -147,12 +201,16 @@ import java.io.*;
                     System.out.println("Reroll(s) left: " + (3 - rerollCounter));
 
                     //Waiting for current player's input
-                    String msg = scr.nextLine();
+                    String msg = input.readLine();
+                    if(reset)
+                        return;
                     switch (msg) {
                         case "1":
                             //re-roll some dices
-                            System.out.println("Please enter in the dice position that you want to hold. Please seperate each number with <<Space>>");
-                            msg = scr.nextLine();
+                            System.out.println("Please enter in the dice position that you want to hold. Please split each number with <<Space>>");
+                            msg = input.readLine();
+                            if(reset)
+                                return;
                             rollDice(msg);
 
                             //re-roll counter reaches limit
@@ -160,7 +218,7 @@ import java.io.*;
                                 System.out.println("                 --- --- --- --- ---" + "\n"
                                         + String.format("Your dices are: | %1d | %1d | %1d | %1d | %1d |", dices[0], dices[1], dices[2], dices[3], dices[4]) + "\n"
                                         + "                 --- --- --- --- ---");
-                                System.out.println("No rerolls left, you have to score your dices");
+                                System.out.println("No re-rolls left, you have to score your dices");
                             }
                             break label;
                         case "2":
@@ -187,27 +245,39 @@ import java.io.*;
                             break;
                     }
                 }
+                rerollCounter++;
             }
             System.out.println("Which category do you want to score? Please enter the number of a category");
 
-            String msg = scr.nextLine();
+            String msg = input.readLine();
+            if(reset)
+                return;
             int category = Integer.parseInt(msg);
 
             //Send warning if category number is invalid
             while (category < 1 || category > 13) {
                 System.out.println("The category you chose is invalid, please enter a number from 1 to 13");
-                msg = scr.nextLine();
+                msg = input.readLine();
+                if(reset)
+                    return;
                 category = Integer.parseInt(msg);
             }
 
             //Send warning if chosen category is already scored
             while (checkIfScored(category)) {
                 System.out.println("The category you entered is already scored, please choose an unscored category");
-                msg = scr.nextLine();
+                msg = input.readLine();
+                if(reset)
+                    return;
                 category = Integer.parseInt(msg);
             }
+
+            //Everything is ready, send it to server now
             str += "Category: " + category + ", " + "Dices: " + Arrays.toString(dices);
-            return str;
+            send(str);
+
+            //reset re-roll counter after forming message
+            rerollCounter = 0;
         }
 
         private void rollDice() {
@@ -242,6 +312,10 @@ import java.io.*;
             rerollCounter++;
         }
 
+        private boolean isCheckReady(){
+            return checkReady;
+        }
+
         //Ask server whether the category is scored
         //Return true if the category is scored
         private boolean checkIfScored(int category){
@@ -253,8 +327,10 @@ import java.io.*;
             if(msg.startsWith("Check Ready")){
                 logging(msg);
                 System.out.println(msg.substring("Check Ready -- ".length()));
-                if(!isTest)
-                    handleReady();
+                synchronized (userInput){
+                    checkReady = true;
+                    userInput.notify();
+                }
             }
             else if(msg.startsWith("Update")){
                 logging(msg);
@@ -266,27 +342,45 @@ import java.io.*;
                 logging("Received ID -- " + msg);
                 id = Character.getNumericValue(msg.charAt(0));
             }
-        }
-
-        //Read user input for game ready status
-        private void handleReady(){
-            String msg = scr.nextLine();
-            while(!msg.equals("ready")){
-                System.out.println("Invalid input, please enter 'ready' when you are ready to play");
-                msg = scr.nextLine();
-            }
-            send(msg);
-            scr.close();
+            else if(msg.equals("Game Start"))
+                ready = true;
         }
 
         //Update client information based on server's message
         //Message's prefix is already removed
         private synchronized void handleUpdate(String msg){
             //Message supposed to be the scored category
-            int category = Integer.parseInt(msg);
+            int category = Character.getNumericValue(msg.charAt(0));
             scorableCategory[category-1] = false;
-            System.out.println("Category index " + (category-1) + " is scored");
-            logging("Category index " + (category-1) + " is scored");
+            int scorerID = Character.getNumericValue(msg.charAt(msg.length()-1));
+            if(scorerID==id) {
+                //if this client made the last scoring, reset is not needed for it
+                System.out.println("Successfully scored in " + categoryNames[category-1]);
+                logging("Category index " + (category - 1) + " is scored");
+            }
+            else {
+                logging("Reset, a score is made by Client " + scorerID);
+                System.out.println(categoryNames[category-1] + " has been scored!\n " +
+                        "you can press <<Enter>> now to make client reset for a new rolling-dice process");
+
+                //toggle reset status to true
+                reset = true;
+            }
+        }
+
+        private void handleReset(){
+            System.out.println("Your input will be reset in a second, please wait for a new round");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            //reset flag variable
+            reset = false;
+
+            //reset re-roll counter
+            rerollCounter = 1;
         }
 
         private void logging(String str){

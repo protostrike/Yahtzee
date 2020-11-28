@@ -75,6 +75,7 @@ public class Server {
         gameEngine = new Thread(new Runnable() {
             public synchronized void run() {
                 logging("==Game start==");
+                sendAll("Game Start");
                 while (!card.isAllScored()) {
                     try {
                         wait();
@@ -171,9 +172,13 @@ public class Server {
             for (int i = 0; i < dicesString.length; i++) {
                 dices[i] = Integer.parseInt(dicesString[i]);
             }
-            logging("Scoring now in category " + (category-1));
-            card.score(dices, category - 1);
-            updateAfterScore(category);
+            if(card.getScoreByCategory(category-1)==-1) {
+                logging("Scoring now in category " + (category - 1));
+                card.score(dices, category - 1);
+                updateAfterScore(playerID, category);
+            }
+            else
+                logging("Client " + playerID + " is trying to score an non-empty category, ignore this one");
         } else if (msg.equals("ready")) {
             list.get(playerID - 1).setReady(true);
         } else {
@@ -229,8 +234,8 @@ public class Server {
 
     //Update to all players after a successful scoring
     //And reset re-roll counter and scorable list
-    private void updateAfterScore(int category) {
-        String msg = "Update -- " + category;
+    private void updateAfterScore(int playerID, int category) {
+        String msg = "Update -- " + category + ", Client: " + playerID;
         sendAll(msg);
     }
 
