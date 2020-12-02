@@ -29,7 +29,6 @@ public class Connection {
     }
 
     public void send(String msg) {
-        System.out.println("Send to Client:" + msg);
         out.write(msg + "\n");
         out.flush();
     }

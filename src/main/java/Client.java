@@ -24,7 +24,7 @@ import java.io.*;
 
         //Attributes for scoring and rolling dices
         int[] dices = new int[5];
-        int rerollCounter = 1;
+        int rerollCounter = 0;
         int id = 0;
         boolean[] scorableCategory = new boolean[13];
 
@@ -105,6 +105,9 @@ import java.io.*;
                             else
                                 handleMessage(msg);
                         }
+                    } catch (SocketException e){
+                        System.out.println("Server disconnected, close this client now");
+                        System.exit(0);
                     }
                     catch (IOException e) {
                         e.printStackTrace();
@@ -156,15 +159,21 @@ import java.io.*;
                         else{
                             //User is now prompt to enter 'ready'
                             String str = input.readLine();
-                            if(!str.equals("ready"))
-                                System.out.println("Invalid input, please enter 'ready' when you are ready to play");
-                        }
-                        if(checkReady&&ready){
-                            //Game is ready to go, user should be prompted to input for scoring
-                            formScoringMessage();
-                            //Check and handle reset status here
-                            if(reset){
-                                handleReset();
+                            if(!ready) {
+                                if (!str.equals("ready"))
+                                    System.out.println("Invalid input, please enter 'ready' when you are ready to play");
+                                else {
+                                    send(str);
+                                    System.out.println("Wait for game to start");
+                                }
+                            }
+                            else{
+                                //Game is ready to go, user should be prompted to input for scoring
+                                formScoringMessage();
+                                //Check and handle reset status here
+                                if(reset){
+                                    handleReset();
+                                }
                             }
                         }
                     }
@@ -172,7 +181,7 @@ import java.io.*;
                 catch(IOException | InterruptedException e){
                     e.printStackTrace();
                 }
-            } );
+            });
             userInput.start();
         }
 
@@ -181,7 +190,7 @@ import java.io.*;
         //Return if reset is needed or finishing up on information gathering
         private void formScoringMessage() throws IOException{
             String str = "";
-            System.out.println("Enter anything and press <<Enter>> to start rolling dices");
+            System.out.println("Press <<Enter>> to start rolling dices");
             if (input.readLine() != null) {
                 if(reset)
                     return;
@@ -245,9 +254,11 @@ import java.io.*;
                             break;
                     }
                 }
-                rerollCounter++;
             }
-            System.out.println("Which category do you want to score? Please enter the number of a category");
+            System.out.println("Please enter a category to score\n" +
+                    "1: Ones. 2: Twos. 3: Threes. 4: Fours. 5: Fives. 6: Sixes.\n" +
+                    "7: Three of A Kind. 8: Four of A Kind. 9: Small Straight.\n" +
+                    "10: Large Straight. 11: Full House. 12: Yahtzee. 13: Chance");
 
             String msg = input.readLine();
             if(reset)
@@ -264,7 +275,7 @@ import java.io.*;
             }
 
             //Send warning if chosen category is already scored
-            while (checkIfScored(category)) {
+            while (!checkAvailableCategory(category)) {
                 System.out.println("The category you entered is already scored, please choose an unscored category");
                 msg = input.readLine();
                 if(reset)
@@ -318,7 +329,7 @@ import java.io.*;
 
         //Ask server whether the category is scored
         //Return true if the category is scored
-        private boolean checkIfScored(int category){
+        private boolean checkAvailableCategory(int category){
             return scorableCategory[category];
         }
 
@@ -342,8 +353,10 @@ import java.io.*;
                 logging("Received ID -- " + msg);
                 id = Character.getNumericValue(msg.charAt(0));
             }
-            else if(msg.equals("Game Start"))
+            else if(msg.equals("Game Start")) {
                 ready = true;
+                System.out.println("Game start, press <<Enter>> to start the game");
+            }
         }
 
         //Update client information based on server's message
@@ -380,7 +393,7 @@ import java.io.*;
             reset = false;
 
             //reset re-roll counter
-            rerollCounter = 1;
+            rerollCounter = 0;
         }
 
         private void logging(String str){

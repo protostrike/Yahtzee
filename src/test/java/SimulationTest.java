@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class SimulationTest {
     Server s;
@@ -12,18 +14,15 @@ public class SimulationTest {
     Client c2;
     Client c3;
     File log = new File("./log.txt").getAbsoluteFile();
+    private final CountDownLatch waiter = new CountDownLatch(1);
 
     @Test
-    public void test() {
+    public void test(){
         testOnePlayerReady();
-        sleep(1000);
         testServerReady();
-        sleep(1000);
         testScoringFromOnePlayer();
-        sleep(1000);
         testMultiScoresFromMultiPlayer();
     }
-
     //Test case: test player's ready status after one player connected to server
     public void testOnePlayerReady() {
         System.out.println("\nTest Case: Test single player's ready status\n");
@@ -55,6 +54,11 @@ public class SimulationTest {
         System.out.println("Test single player's ready status passed");
         server.interrupt();
         client1.interrupt();
+        try {
+            waiter.await(1000 * 1000, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     //Test case: test server's ready status after all three players are ready
@@ -102,6 +106,11 @@ public class SimulationTest {
         client1.interrupt();
         client2.interrupt();
         client3.interrupt();
+        try {
+            waiter.await(1000 * 1000, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void testScoringFromOnePlayer(){
@@ -144,6 +153,11 @@ public class SimulationTest {
             Assert.assertTrue(containLog("Category index 0 is scored"));
         } catch (AssertionError e){
             Assert.fail("Client cannot get updated message after scoring");
+        }
+        try {
+            waiter.await(1000 * 1000, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -210,6 +224,11 @@ public class SimulationTest {
             } catch (AssertionError e){
                 Assert.fail("Error: category " + i + " is not scored");
             }
+        }
+        try {
+            waiter.await(1000 * 1000, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 

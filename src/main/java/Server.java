@@ -8,15 +8,15 @@ import java.io.*;
 
 public class Server {
     //initialize socket and input stream
-    public List<Connection> list = new ArrayList<>();
-    ServerSocket ss;
-    Thread waitForConnection;
-    Thread gameEngine;
+    private List<Connection> list = new ArrayList<>();
+    private ServerSocket ss;
+    private Thread waitForConnection;
+    private Thread gameEngine;
     boolean up;
     boolean ready;
     ScoreCard card;
-    File log;
-    FileWriter logWriter;
+    private File log;
+    private FileWriter logWriter;
 
     public Server(int port) {
         try {
@@ -216,6 +216,9 @@ public class Server {
                 try {
                     String msg = connection.in.readLine();
                     handleMessage(connection.id, msg);
+                } catch (SocketException e){
+                    System.out.println("One of the client disconnected, close the server now");
+                    System.exit(0);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
