@@ -14,6 +14,8 @@ public class SimulationTest {
     Client c2;
     Client c3;
     File log = new File("./log.txt").getAbsoluteFile();
+
+    //Waiter for waiting after each test case
     private final CountDownLatch waiter = new CountDownLatch(1);
 
     @Test
@@ -23,6 +25,7 @@ public class SimulationTest {
         testScoringFromOnePlayer();
         testMultiScoresFromMultiPlayer();
     }
+
     //Test case: test player's ready status after one player connected to server
     public void testOnePlayerReady() {
         System.out.println("\nTest Case: Test single player's ready status\n");
@@ -245,6 +248,8 @@ public class SimulationTest {
         c.send(msg);
     }
 
+    //Method to read running status from server
+    //Wait if the server is not running
     private void waitForServerUp(){
         System.out.println("Wait until server is up and running properly");
         while(!s.up){
@@ -253,6 +258,8 @@ public class SimulationTest {
         }
     }
 
+    //Method to read running status from one client
+    //Wait if it is not all running
     private void waitForOneClientUp(Client c){
         System.out.println("Wait until the client is up and running properly");
         while(!c.up){
@@ -261,6 +268,8 @@ public class SimulationTest {
         }
     }
 
+    //Method to read running status from all clients
+    //Wait if they are not all running
     private void waitForAllClientsUp(){
         System.out.println("Wait until all clients are up and running properly");
         while(!c1.up||!c2.up||!c3.up){
@@ -269,6 +278,8 @@ public class SimulationTest {
         }
     }
 
+    //Method to read ready status from all clients
+    //Wait if they are not all ready
     private void waitForAllClientsReady(){
         System.out.println("Wait until all clients are ready to play");
         while(!s.getConnection(1).isReady()||!s.getConnection(2).isReady()||!s.getConnection(3).isReady()){
@@ -277,6 +288,8 @@ public class SimulationTest {
         }
     }
 
+    //Method to read server ready status
+    //Wait if server is not ready
     private void waitForServerReady(){
         System.out.println("Wait until server is ready to play");
         while(!s.isReady()){
@@ -285,6 +298,7 @@ public class SimulationTest {
         }
     }
 
+    //Check if log file contains certain message
     private boolean containLog(String msg){
         try {
             Scanner scr = new Scanner(log);

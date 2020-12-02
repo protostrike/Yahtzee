@@ -135,6 +135,7 @@ import java.io.*;
             }
         }
 
+        //Close all stream and socket
         public void close() {
             try {
                 logWriter.close();
@@ -150,6 +151,7 @@ import java.io.*;
             }
         }
 
+        //Method to initialize thread for input listener
         private void listenToUserInput(){
             userInput = new Thread(() -> {
                 try {
@@ -291,6 +293,7 @@ import java.io.*;
             rerollCounter = 0;
         }
 
+        //Roll all dices
         private void rollDice() {
             for(int i = 0; i < dices.length; i++) {
                 dices[i] = (int) Math.ceil(Math.random()*6);
@@ -298,6 +301,7 @@ import java.io.*;
             rerollCounter++;
         }
 
+        //Roll all other dices that are not appear in holding list
         private void rollDice(String hold) {
             String[] str = hold.split(" ");
             int[] holdingList = new int[str.length];
@@ -381,6 +385,7 @@ import java.io.*;
             }
         }
 
+        //reset alert handler
         private void handleReset(){
             System.out.println("Your input will be reset in a second, please wait for a new round");
             try {
@@ -396,6 +401,7 @@ import java.io.*;
             rerollCounter = 0;
         }
 
+        //Logging to file
         private void logging(String str){
             try {
                 if(id==0) {

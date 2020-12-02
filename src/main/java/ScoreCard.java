@@ -2,18 +2,27 @@ import java.util.Arrays;
 
 public class ScoreCard {
 
-    /*Upper section
+    /*
+    Upper section
         index 0: Ones
         index 1: Twos
         index 2: Threes
         index 3: Fours
         index 4: Fives
         index 5: Sixes
+    Lower section
+        index 0: Three of A Kind
+        index 1: Four of A Kind
+        index 2: Small Straight
+        index 3: Large Straight
+        index 4: Full House
+        index 5: Yahtzee
+        index 6: Chance
      */
     int[] upperSection;
+    int[] lowerSection;
     int upperBonus = 0;
     int yahtzeeBonus = 0;
-    int[] lowerSection;
 
     public ScoreCard(){
         //Initial all score to -1 (-1 means no score recorded yet)

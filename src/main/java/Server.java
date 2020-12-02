@@ -7,7 +7,7 @@ import java.util.List;
 import java.io.*;
 
 public class Server {
-    //initialize socket and input stream
+
     private List<Connection> list = new ArrayList<>();
     private ServerSocket ss;
     private Thread waitForConnection;
@@ -18,6 +18,7 @@ public class Server {
     private File log;
     private FileWriter logWriter;
 
+    //Constructor
     public Server(int port) {
         try {
             ss = new ServerSocket(port);
@@ -40,7 +41,10 @@ public class Server {
         }
     }
 
+    //Main entry point to start server
     public void start() {
+        System.out.println("Server start");
+        System.out.println("Server's IP is: " + ss.getInetAddress());
         //Thread for getting connection requests
         //For now, only three players is allowed to join this game
         waitForConnection = new Thread(() -> {
@@ -118,6 +122,7 @@ public class Server {
         }
     }
 
+    //Method to close streams and socket
     public void close() {
         try {
             waitForConnection.interrupt();
@@ -187,6 +192,7 @@ public class Server {
         }
     }
 
+    //Method to write in logs
     private void logging(String str) {
         try {
             str = "[" + LocalTime.now() + "]Server: " + str + "\n";
