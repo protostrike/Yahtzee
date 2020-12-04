@@ -3,14 +3,14 @@ import java.net.Socket;
 import java.time.LocalTime;
 
 public class Connection {
-    Socket serverClient;
+    private Socket serverClient;
     BufferedReader in;
     PrintWriter out;
     int id;
     boolean ready = false;
 
-    File log = new File("./log.txt");
-    FileWriter logWriter;
+    private File log = new File("./log.txt");
+    private FileWriter logWriter;
 
     public Connection(Socket s, int id) {
         try {

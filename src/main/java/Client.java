@@ -7,26 +7,26 @@ import java.io.*;
     public class Client
     {
         //Basic attribute to start socket
-        static int Port = 5000;
+        private static int Port = 5000;
         public InetAddress ip;
-        Socket s;
+        private Socket s;
 
         //User input reader
-        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+        private BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 
         //Used to obtain socket's input and output streams
-        BufferedReader in;
-        PrintWriter out;
+        private BufferedReader in;
+        private PrintWriter out;
 
         //Declared this thread here to help on closing the client
-        Thread readMessage;
-        Thread userInput;
+        private Thread readMessage;
+        private Thread userInput;
 
         //Attributes for scoring and rolling dices
-        int[] dices = new int[5];
-        int rerollCounter = 0;
-        int id = 0;
-        boolean[] scorableCategory = new boolean[13];
+        private int[] dices = new int[5];
+        private int rerollCounter = 0;
+        private int id = 0;
+        private boolean[] scorableCategory = new boolean[13];
 
         //Flag variables to help on testing and determining different situations
         boolean up = false;
@@ -35,12 +35,12 @@ import java.io.*;
         boolean reset = false;
 
         //Variables for logging
-        File log = new File("./log.txt");
-        FileWriter logWriter;
+        private File log = new File("./log.txt");
+        private FileWriter logWriter;
 
         //Array contains all categories' names
         //Used for printing information to user
-        String[] categoryNames = {"Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Three of a Kind",
+        private String[] categoryNames = {"Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Three of a Kind",
         "Four of a Kind", "Small Straight", "Large Straight", "Full House", "Yahtzee", "Chance"};
 
         //Default constructor
@@ -71,11 +71,6 @@ import java.io.*;
         public Client(String ip, int port) {
             this(ip);
             Port = port;
-        }
-
-        public void send(String msg) {
-            out.write(msg + "\n");
-            out.flush();
         }
 
         //Main entry point of client
@@ -293,6 +288,11 @@ import java.io.*;
             rerollCounter = 0;
         }
 
+        public void send(String msg) {
+            out.write(msg + "\n");
+            out.flush();
+        }
+
         //Roll all dices
         private void rollDice() {
             for(int i = 0; i < dices.length; i++) {
@@ -361,6 +361,14 @@ import java.io.*;
                 ready = true;
                 System.out.println("Game start, press <<Enter>> to start the game");
             }
+            else if(msg.startsWith("Card")){
+                msg = msg.substring("Card -- ".length());
+                System.out.println("Current score card is: ");
+                System.out.println(msg);
+            }
+            else if(msg.startsWith("End")){
+                handleGameEnd(msg);
+            }
         }
 
         //Update client information based on server's message
@@ -399,6 +407,14 @@ import java.io.*;
 
             //reset re-roll counter
             rerollCounter = 0;
+        }
+
+        private void handleGameEnd(String msg){
+            String card = msg.substring("End Card -- ".length());
+            System.out.println("Game ends\n Final score information is: ");
+            System.out.println(card);
+            System.out.println("Closing client now");
+            System.exit(0);
         }
 
         //Logging to file

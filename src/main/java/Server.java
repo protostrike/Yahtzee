@@ -111,10 +111,11 @@ public class Server {
 
             //Wait until game ends
             gameEngine.join();
-            logging("==Game ends==");
+            gameEnd();
             //After game is complete, close all clients
             //Then wait for 3 seconds and close ServerSocket
             Thread.sleep(3000);
+            System.out.println("Game ends, closing server now");
             close();
         } catch (InterruptedException e) {
             logging("Main server thread interrupted, closing now");
@@ -137,6 +138,7 @@ public class Server {
             for(Connection c : list)
                 c.close();
             logWriter.close();
+            System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -247,6 +249,13 @@ public class Server {
     private void updateAfterScore(int playerID, int category) {
         String msg = "Update -- " + category + ", Client: " + playerID;
         sendAll(msg);
+        msg = "Card -- " + card;
+        sendAll(msg);
+    }
+
+    private void gameEnd(){
+        logging("==Game ends==");
+        sendAll("End Card -- " + card);
     }
 
     /*
