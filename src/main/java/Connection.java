@@ -3,7 +3,6 @@ import java.net.Socket;
 import java.time.LocalTime;
 
 public class Connection {
-    private Socket serverClient;
     BufferedReader in;
     PrintWriter out;
     int id;
@@ -19,7 +18,6 @@ public class Connection {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.serverClient = s;
         this.id = id;
         try {
             logWriter = new FileWriter(log.getAbsoluteFile(), true);
