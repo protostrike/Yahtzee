@@ -35,7 +35,7 @@ public class RollDices {
 
     @Then("first {int} dices should be unchanged")
     public void checkDices(Integer int1) {
-        for(int i = 0; i < 5; i++) {
+        for(int i = 0; i < int1; i++) {
             assert(firstDices[i] == secondDices[i]);
         }
 
@@ -45,8 +45,8 @@ public class RollDices {
 
     @Then("I check after re-roll")
     public void checkRerollCounter() {
-        System.out.println("First set of dices: " + firstDices);
-        System.out.println("Dices after re-roll: " + secondDices);
+        System.out.println("First set of dices: " + firstDices.toString());
+        System.out.println("Dices after re-roll: " + secondDices.toString());
     }
 
 }

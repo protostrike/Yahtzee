@@ -60,70 +60,70 @@ Feature: Scoring tests
     When I score [1, 2, 6, 6, 5] in category 6
     Then total score should be 12
 
-  Scenario: scoring 0 in Small Straight
-    Given I am a ScoreCard
-    When I score [2, 2, 2, 2, 2] in category 7
-    Then total score should be 0
-
-  Scenario: scoring non-0 in Small Straight
-    Given I am a ScoreCard
-    When I score [1, 2, 3, 6, 4] in category 7
-    Then total score should be 30
-
-  Scenario: scoring 0 in Large Straight
-    Given I am a ScoreCard
-    When I score [2, 2, 2, 2, 2] in category 8
-    Then total score should be 0
-
-  Scenario: scoring non-0 in Large Straight
-    Given I am a ScoreCard
-    When I score [5, 2, 3, 6, 4] in category 8
-    Then total score should be 40
-
-  Scenario: scoring 0 in Full House
-    Given I am a ScoreCard
-    When I score [2, 2, 2, 2, 2] in category 9
-    Then total score should be 0
-
-  Scenario: scoring non-0 in Full House
-    Given I am a ScoreCard
-    When I score [2, 2, 3, 3, 2] in category 9
-    Then total score should be 25
-
   Scenario: scoring 0 in Three of A Kind
     Given I am a ScoreCard
-    When I score [2, 5, 3, 2, 1] in category 10
+    When I score [2, 5, 3, 2, 1] in category 7
     Then total score should be 0
 
   Scenario: scoring non-0 in Three of A Kind
     Given I am a ScoreCard
-    When I score [2, 2, 3, 3, 2] in category 10
+    When I score [2, 2, 3, 3, 2] in category 7
     Then total score should be 12
 
   Scenario: scoring 0 in Four of A Kind
     Given I am a ScoreCard
-    When I score [2, 5, 3, 2, 1] in category 11
+    When I score [2, 5, 3, 2, 1] in category 8
     Then total score should be 0
 
   Scenario: scoring non-0 in Four of A Kind
     Given I am a ScoreCard
-    When I score [2, 2, 2, 3, 2] in category 11
+    When I score [2, 2, 2, 3, 2] in category 8
     Then total score should be 11
 
-  Scenario: scoring in Chance
+  Scenario: scoring 0 in Small Straight
     Given I am a ScoreCard
-    When I score [2, 2, 3, 3, 2] in category 12
-    Then total score should be 12
+    When I score [2, 2, 2, 2, 2] in category 9
+    Then total score should be 0
+
+  Scenario: scoring non-0 in Small Straight
+    Given I am a ScoreCard
+    When I score [1, 2, 3, 6, 4] in category 9
+    Then total score should be 30
+
+  Scenario: scoring 0 in Large Straight
+    Given I am a ScoreCard
+    When I score [2, 2, 2, 2, 2] in category 10
+    Then total score should be 0
+
+  Scenario: scoring non-0 in Large Straight
+    Given I am a ScoreCard
+    When I score [5, 2, 3, 6, 4] in category 10
+    Then total score should be 40
+
+  Scenario: scoring 0 in Full House
+    Given I am a ScoreCard
+    When I score [2, 2, 2, 2, 2] in category 11
+    Then total score should be 0
+
+  Scenario: scoring non-0 in Full House
+    Given I am a ScoreCard
+    When I score [2, 2, 3, 3, 2] in category 11
+    Then total score should be 25
 
   Scenario: scoring 0 in Yahtzee
     Given I am a ScoreCard
-    When I score [2, 5, 3, 2, 1] in category 13
+    When I score [2, 5, 3, 2, 1] in category 12
     Then total score should be 0
 
   Scenario: scoring non-0 in Yahtzee
     Given I am a ScoreCard
-    When I score [2, 2, 2, 2, 2] in category 13
+    When I score [2, 2, 2, 2, 2] in category 12
     Then total score should be 50
+
+  Scenario: scoring in Chance
+    Given I am a ScoreCard
+    When I score [2, 2, 3, 3, 2] in category 13
+    Then total score should be 12
 
   Scenario: getting upper bonus
     Given I am a ScoreCard
@@ -137,7 +137,7 @@ Feature: Scoring tests
 
   Scenario: getting Yahtzee bonus
     Given I am a ScoreCard
-    When I score [1, 1, 1, 1, 1] in category 13
+    When I score [1, 1, 1, 1, 1] in category 12
     And I score [1, 1, 1, 1, 1] in category 1
     Then total score should be 155
 

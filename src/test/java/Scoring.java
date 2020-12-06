@@ -26,7 +26,7 @@ public class Scoring {
         }
         System.out.println("Scoring [" + dices[0] + dices[1] + dices[2] + dices[3] + dices[4] +
                 "] in category " + getCategoryName(int6));
-        sc.score(dices, int6);
+        sc.score(dices, int6-1);
     }
 
     @Then("total score should be {int}")
@@ -61,19 +61,19 @@ public class Scoring {
             case 6:
                 return "Sixes";
             case 7:
-                return "Small Straight";
-            case 8:
-                return "Large Straight";
-            case 9:
-                return "Full House";
-            case 10:
                 return "Three of A Kind";
-            case 11:
+            case 8:
                 return "Four of A Kind";
+            case 9:
+                return "Small Straight";
+            case 10:
+                return "Large Straight";
+            case 11:
+                return "Full House";
             case 12:
-                return "Chance";
-            case 13:
                 return "Yahtzee";
+            case 13:
+                return "Chance";
             default:
                 return null;
         }
