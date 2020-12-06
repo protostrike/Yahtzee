@@ -4,7 +4,6 @@ import java.util.Scanner;
 public class Player {
     ScoreCard card;
     int[] dices = new int[5];
-    Scanner scanner = new Scanner(System.in);
 
     public Player(){
         card = new ScoreCard();
