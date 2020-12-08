@@ -30,6 +30,10 @@ public class ScoreCard {
     }
 
     public void score(int[] dices, int category){
+        if(getScoreByCategory(category)!=-1){
+            System.out.println("Category " + category + " scored, ignore this one");
+            return;
+        }
         if(category<=5)
             scoreUppers(dices, category);
         else if(category==6)
@@ -42,11 +46,13 @@ public class ScoreCard {
             scoreLargeStraight(dices);
         else if(category==10)
             scoreFullHouse(dices);
-        else if(category==11)
+        else if(category==11) {
             scoreYahtzee(dices);
+            return; //Skipping the check yahtzee bonus part
+        }
         else if(category==12)
             scoreChance(dices);
-        if(checkYahtzeeBonus(dices))
+        if(checkYahtzeeBonus(dices)&&getScoreByCategory(11)!=-1)
             yahtzeeBonus += 100;
     }
 
@@ -206,7 +212,7 @@ public class ScoreCard {
             if(score!=-1)
                 total += score;
         }
-
+        total += upperBonus + yahtzeeBonus;
         return total;
     }
 
