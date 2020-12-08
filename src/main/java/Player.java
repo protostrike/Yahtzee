@@ -25,13 +25,16 @@ public class Player {
             holdingList[i] = Integer.parseInt(hold[i]) - 1;
         }
         Arrays.sort(holdingList);
+        System.out.println(Arrays.toString(holdingList));
         //re-roll dices that not selected for holding
         int index = 0; // index for traversing holdingList
         for(int i = 0; i < dices.length; i++) {
+            //Index reaches the end of holding list
             if(index >= holdingList.length) {
                 dices[i] = (int) Math.ceil(Math.random()*6);
                 continue;
             }
+            //Holding index matches the dice
             if(i == holdingList[index]) {
                 index++;
             }

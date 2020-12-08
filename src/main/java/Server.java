@@ -109,12 +109,12 @@ public class Server {
             }
 
             //Send warning if chosen category is already scored
-            int isScored = getPlayer(currentPlayer).card.getScoreByCategory(category);
+            int isScored = getPlayer(currentPlayer).card.getScoreByCategory(category-1);
             while(isScored!=-1) {
                 send(currentPlayer, "The category you entered is already scored, please choose an unscored category");
                 msg = getPlayer(currentPlayer).in.readLine();
                 category = Integer.parseInt(msg);
-                isScored = getPlayer(currentPlayer).card.getScoreByCategory(category);
+                isScored = getPlayer(currentPlayer).card.getScoreByCategory(category-1);
             }
             getPlayer(currentPlayer).card.score(dices, category-1);
         }

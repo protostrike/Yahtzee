@@ -1,6 +1,7 @@
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.junit.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,14 +15,7 @@ public class Simulation {
     public void startServer(Integer int1) {
         s = new Server(int1);
         port = int1;
-        Thread server = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                s.start();
-            }
-
-        });
+        Thread server = new Thread(() -> s.start());
         server.start();
     }
 
@@ -29,14 +23,7 @@ public class Simulation {
     public void connectClient(Integer int1, String name) {
         Client c = new Client("localhost", port, name);
         players.add(int1-1, c);
-        Thread client = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                c.start();
-            }
-
-        });
+        Thread client = new Thread(() -> c.start());
         client.start();
         wait(2);
     }
@@ -57,12 +44,11 @@ public class Simulation {
 
     @When("players play this game")
     public void playGame() {
-
         for(int i = 1; i <= 13; i++) {
             for(int n = 0; n < players.size(); n++) {
                 if(i == 4) {
                     System.out.println("Test re-roll all dices in Round 4!");
-                    playRoundwithReroll(players.get(n), i);
+                    playRoundWithReroll(players.get(n), i);
                 }
                 else if(i == 6) {
                     System.out.println("Test re-roll last 3 dices in Round 6!");
@@ -79,9 +65,9 @@ public class Simulation {
     @Then("game ends")
     public void checkEndGame() {
         try {
-            assert(s.highest!=null);
+            Assert.assertTrue(s.highest!=null);
         } catch (AssertionError e) {
-            System.out.println("No highest score found, game was not end correctly, test fail");
+            Assert.fail("No highest score found, game was not end correctly, test fail");
         }
         System.out.println("Simulation success");
     }
@@ -93,7 +79,6 @@ public class Simulation {
             c.close();
         }
     }
-
 
     //Player plays a round with no re-roll
     public void playRound(Client currentPlayer, int currentRound) {
@@ -110,7 +95,7 @@ public class Simulation {
     }
 
     //Player plays a round with 2 re-rolls
-    public void playRoundwithReroll(Client currentPlayer, int currentRound) {
+    public void playRoundWithReroll(Client currentPlayer, int currentRound) {
         System.out.println("Player " + currentPlayer.name +" roll first time");
         currentPlayer.send("");
         wait(1);
