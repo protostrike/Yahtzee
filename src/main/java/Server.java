@@ -44,7 +44,11 @@ public class Server {
     //Main entry point to start server
     public void start() {
         System.out.println("Server start");
-        System.out.println("Server's IP is: " + ss.getInetAddress());
+        try {
+            System.out.println("Server's IP is: " + InetAddress.getLocalHost().getHostAddress());
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
         //Thread for getting connection requests
         //For now, only three players is allowed to join this game
         waitForConnection = new Thread(() -> {
@@ -138,7 +142,6 @@ public class Server {
             for(Connection c : list)
                 c.close();
             logWriter.close();
-            System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -171,11 +174,12 @@ public class Server {
                 System.out.println("Game is not ready yet, ignore this message");
                 return;
             }
-            //Remove the prefix "Category: "
-            msg = msg.substring("Category: ".length());
-            int category = Character.getNumericValue(msg.charAt(0));
-            msg = msg.substring(3).substring("Dices: ".length());
-            String[] dicesString = msg.substring(1, msg.length() - 1).split(",");
+            //Get the category
+            int category = Character.getNumericValue(msg.substring("Category: ".length()).charAt(0));
+
+            //Remove the substring before dices array
+            msg = msg.substring("Category: a, Dices: ".length());
+            String[] dicesString = msg.trim().substring(1, msg.length() - 1).split(",");
             int[] dices = new int[5];
             for (int i = 0; i < dicesString.length; i++) {
                 dices[i] = Integer.parseInt(dicesString[i].trim());
