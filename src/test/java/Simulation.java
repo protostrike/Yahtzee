@@ -18,7 +18,6 @@ public class Simulation {
 
             @Override
             public void run() {
-                // TODO Auto-generated method stub
                 s.start();
             }
 
@@ -34,7 +33,6 @@ public class Simulation {
 
             @Override
             public void run() {
-                // TODO Auto-generated method stub
                 c.start();
             }
 
@@ -155,7 +153,6 @@ public class Simulation {
         try {
             Thread.sleep(time*1000);
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
