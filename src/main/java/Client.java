@@ -12,20 +12,18 @@ import java.io.*;
         private Socket s;
 
         //User input reader
-        private BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+        private final BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 
         //Used to obtain socket's input and output streams
         private BufferedReader in;
         private PrintWriter out;
 
-        //Declared this thread here to help on closing the client
-        private Thread readMessage;
         private Thread userInput;
 
         //Attributes for scoring and rolling dices
         private int[] dices = new int[5];
         private int rerollCounter = 0;
-        private int id = 0;
+        int id = 0;
         private boolean[] scorableCategory = new boolean[13];
 
         //Flag variables to help on testing and determining different situations
@@ -35,12 +33,12 @@ import java.io.*;
         boolean reset = false;
 
         //Variables for logging
-        private File log = new File("./log.txt");
+        private final File log = new File("./log.txt");
         private FileWriter logWriter;
 
         //Array contains all categories' names
         //Used for printing information to user
-        private String[] categoryNames = {"Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Three of a Kind",
+        private final String[] categoryNames = {"Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Three of a Kind",
         "Four of a Kind", "Small Straight", "Large Straight", "Full House", "Yahtzee", "Chance"};
 
         //Default constructor
@@ -86,25 +84,24 @@ import java.io.*;
             }
 
             // readMessage thread
-            readMessage = new Thread(new Runnable()
-            {
+            // read the message send to this client
+            //Declared this thread here to help on closing the client
+            Thread readMessage = new Thread(new Runnable() {
                 @Override
                 public synchronized void run() {
                     try {
                         while (true) {
                             // read the message send to this client
                             String msg = in.readLine();
-                            if(msg.equals("close socket")) {
+                            if (msg.equals("close socket")) {
                                 return;
-                            }
-                            else
+                            } else
                                 handleMessage(msg);
                         }
-                    } catch (SocketException e){
+                    } catch (SocketException e) {
                         System.out.println("Server disconnected, close this client now");
                         System.exit(0);
-                    }
-                    catch (IOException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
@@ -121,13 +118,15 @@ import java.io.*;
                 }
             }
             up = true;
-            try {
-                readMessage.join();
-                close();
-            } catch (InterruptedException e) {
-                System.out.println("Client thread interrupted, closing now");
-                close();
-            }
+            new Thread(() -> {
+                try {
+                    readMessage.join();
+                    close();
+                } catch (InterruptedException e) {
+                    System.out.println("Client thread interrupted, closing now");
+                    close();
+                }
+            }).start();
         }
 
         //Close all stream and socket

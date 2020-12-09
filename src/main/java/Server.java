@@ -43,7 +43,7 @@ public class Server {
 
     //Main entry point to start server
     public void start() {
-        System.out.println("Server start");
+        System.out.println("Server start at port " + ss.getLocalPort());
         try {
             System.out.println("Server's IP is: " + InetAddress.getLocalHost().getHostAddress());
         } catch (UnknownHostException e) {
@@ -55,6 +55,7 @@ public class Server {
             try {
                 Socket s;
                 logging("==Server start==");
+                logging("Port: " + ss.getLocalPort());
                 logging("Wait for client connection");
                 while (list.size() < 3 && !ready) {
                     try {

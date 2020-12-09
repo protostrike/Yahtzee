@@ -1,16 +1,17 @@
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
+
 import java.util.ArrayList;
 import java.util.List;
-import io.cucumber.java.en.*;
 
-public class Scoring {
-
+public class ScoringStep {
     static ScoreCard sc;
 
     @Given("I am a ScoreCard")
     public void InitializeScoreCard() {
         sc = new ScoreCard();
     }
-
 
     @When("I score [{int}, {int}, {int}, {int}, {int}] in category {int}")
     public void scoring(Integer int1, Integer int2, Integer int3, Integer int4, Integer int5, Integer int6) {
@@ -42,11 +43,10 @@ public class Scoring {
         }
     }
 
-
     /*
      * Helper function to get category's name by given an index
      */
-    public String getCategoryName(int i) {
+    private String getCategoryName(int i) {
         switch(i) {
             case 1:
                 return "Ones";
@@ -78,5 +78,4 @@ public class Scoring {
                 return null;
         }
     }
-
 }
