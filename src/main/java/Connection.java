@@ -3,8 +3,8 @@ import java.net.Socket;
 import java.time.LocalTime;
 
 public class Connection {
-    BufferedReader in;
-    PrintWriter out;
+    ObjectInputStream in;
+    ObjectOutputStream out;
     int id;
     boolean ready = false;
 
@@ -13,8 +13,8 @@ public class Connection {
 
     public Connection(Socket s, int id) {
         try {
-            this.out = new PrintWriter(s.getOutputStream());
-            this.in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+            this.out = new ObjectOutputStream(s.getOutputStream());
+            this.in = new ObjectInputStream(s.getInputStream());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -26,9 +26,13 @@ public class Connection {
         }
     }
 
-    public void send(String msg) {
-        out.write(msg + "\n");
-        out.flush();
+    public void send(Message msg) {
+        try {
+            out.writeObject(msg);
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public int getPlayerId(){

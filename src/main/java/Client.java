@@ -15,8 +15,8 @@ import java.io.*;
         private final BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 
         //Used to obtain socket's input and output streams
-        private BufferedReader in;
-        private PrintWriter out;
+        private ObjectInputStream in;
+        private ObjectOutputStream out;
 
         private Thread userInput;
 
@@ -33,7 +33,7 @@ import java.io.*;
         boolean reset = false;
 
         //Variables for logging
-        private final File log = new File("./log.txt");
+        private File log;
         private FileWriter logWriter;
 
         //Array contains all categories' names
@@ -75,10 +75,11 @@ import java.io.*;
         public void start() {
             // obtaining input and out streams of socket
             try {
+                log = new File("./log-" + Port +".txt");
                 logWriter = new FileWriter(log.getAbsoluteFile(), true);
                 s = new Socket(ip, Port);
-                in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-                out = new PrintWriter(s.getOutputStream());
+                in = new ObjectInputStream(s.getInputStream());
+                out = new ObjectOutputStream(s.getOutputStream());
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
@@ -92,7 +93,7 @@ import java.io.*;
                     try {
                         while (true) {
                             // read the message send to this client
-                            String msg = in.readLine();
+                            Message msg = (Message) in.readObject();
                             if (msg.equals("close socket")) {
                                 return;
                             } else
@@ -101,7 +102,7 @@ import java.io.*;
                     } catch (SocketException e) {
                         System.out.println("Server disconnected, close this client now");
                         System.exit(0);
-                    } catch (IOException e) {
+                    } catch (IOException | ClassNotFoundException e) {
                         e.printStackTrace();
                     }
                 }
@@ -134,11 +135,7 @@ import java.io.*;
             try {
                 logWriter.close();
                 in.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            out.close();
-            try {
+                out.close();
                 s.close();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -159,7 +156,7 @@ import java.io.*;
                                 if (!str.equals("ready"))
                                     System.out.println("Invalid input, please enter 'ready' when you are ready to play");
                                 else {
-                                    send(str);
+                                    send(new Message(Message.Type.ClientReady, str));
                                     System.out.println("Wait for game to start");
                                 }
                             }
@@ -281,15 +278,19 @@ import java.io.*;
 
             //Everything is ready, send it to server now
             str += "Category: " + category + ", " + "Dices: " + Arrays.toString(dices);
-            send(str);
+            send(new Message(Message.Type.Score, str));
 
             //reset re-roll counter after forming message
             rerollCounter = 0;
         }
 
-        public void send(String msg) {
-            out.write(msg + "\n");
-            out.flush();
+        public void send(Message msg) {
+            try {
+                out.writeObject(msg);
+                out.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         //Roll all dices
@@ -337,36 +338,35 @@ import java.io.*;
         }
 
         //Handle messages incoming from server
-        private void handleMessage(String msg){
-            if(msg.startsWith("Check Ready")){
-                logging(msg);
-                System.out.println(msg.substring("Check Ready -- ".length()));
+        private void handleMessage(Message msg){
+            String message = msg.message;
+            if(msg.type.equals(Message.Type.CheckReady)){
+                logging("Check Client ready");
+                System.out.println(message);
                 synchronized (userInput){
                     checkReady = true;
                     userInput.notify();
                 }
             }
-            else if(msg.startsWith("Update")){
-                logging(msg);
-                msg = msg.substring("Update -- ".length());
-                handleUpdate(msg);
+            else if(msg.type.equals(Message.Type.Update)){
+                logging(message);
+                message = message.substring("Update -- ".length());
+                handleUpdate(message);
             }
-            else if(msg.startsWith("Your ID is")){
-                msg = msg.substring("Your ID is: ".length());
-                logging("Received ID -- " + msg);
-                id = Character.getNumericValue(msg.charAt(0));
+            else if(msg.type.equals(Message.Type.ID)){
+                logging("Received ID -- " + message);
+                id = Character.getNumericValue(message.charAt(0));
             }
-            else if(msg.equals("Game Start")) {
+            else if(msg.type.equals(Message.Type.Start)) {
                 ready = true;
                 System.out.println("Game start, press <<Enter>> to start the game");
             }
-            else if(msg.startsWith("Card")){
-                msg = msg.substring("Card -- ".length());
+            else if(msg.type.equals(Message.Type.Card)){
                 System.out.println("Current score card is: ");
-                System.out.println(msg);
+                System.out.println(message);
             }
-            else if(msg.startsWith("End")){
-                handleGameEnd(msg);
+            else if(msg.type.equals(Message.Type.End)){
+                handleGameEnd(message);
             }
         }
 
@@ -409,9 +409,8 @@ import java.io.*;
         }
 
         private void handleGameEnd(String msg){
-            String card = msg.substring("End Card -- ".length());
             System.out.println("Game ends\n Final score information is: ");
-            System.out.println(card);
+            System.out.println(msg);
             System.out.println("Closing client now");
             System.exit(0);
         }

@@ -15,16 +15,11 @@ public class ClientStep {
     static Client c3;
 
     Thread serverThread;
-    File log = new File("./log.txt").getAbsoluteFile();
-    final CucumberTestContext testContext;
-
-
-    public ClientStep(CucumberTestContext testContext){
-        this.testContext = testContext;
-    }
+    File log;
 
     @Given("A server starts at port {int}")
     public void InitializeServer(Integer int1){
+        log = new File("./log-" + int1 +".txt").getAbsoluteFile();
         if(log.getAbsoluteFile().exists())
             log.delete();
         Server s = new Server(int1);
@@ -52,7 +47,7 @@ public class ClientStep {
         while(!getClient(int1).up)
             sleep(100);
         System.out.println("Client send ready");
-        sendMessage(int1, "ready");
+        sendMessage(int1, new Message(Message.Type.ClientReady, "ready"));
     }
 
     @Then("Client waits until game starts")
@@ -71,7 +66,7 @@ public class ClientStep {
         dices[3] = int5;
         dices[4] = int6;
         String msg = "Category: " + int7 + ", " + "Dices: " + Arrays.toString(dices);
-        sendMessage(int1, msg);
+        sendMessage(int1, new Message(Message.Type.Score, msg));
         System.out.println("Client " + int1 + " scored dices[" + int2 + int3 + int4 + int5 + int6 + "] in category " + int7);
     }
 
@@ -96,13 +91,9 @@ public class ClientStep {
         sleep(int1*1000);
     }
 
-    //@After
-    public void cleanUp(){
-        testContext.close();
-    }
 
     //Send message from client with given position in array
-    private void sendMessage(Integer pos, String msg){
+    private void sendMessage(Integer pos, Message msg){
         getClient(pos).send(msg);
     }
 

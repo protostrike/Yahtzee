@@ -13,16 +13,16 @@ public class SimulationTest {
     Client c1;
     Client c2;
     Client c3;
-    File log = new File("./log.txt").getAbsoluteFile();
+    File log;
 
     //Waiter for waiting after each test case
     private final CountDownLatch waiter = new CountDownLatch(1);
 
-    //@Test
+    @Test
     public void test(){
-        testOnePlayerReady();
-        testServerReady();
-        testScoringFromOnePlayer();
+        //testOnePlayerReady();
+        //testServerReady();
+        //testScoringFromOnePlayer();
         testMultiScoresFromMultiPlayer();
     }
 
@@ -32,7 +32,7 @@ public class SimulationTest {
         //Construct server and client
         s = new Server(5000);
         c1 = new Client();
-
+        log = new File("./log-" + 5000 +".txt").getAbsoluteFile();
         //Start server
         Thread server = new Thread(() -> s.start());
         server.start();
@@ -47,7 +47,7 @@ public class SimulationTest {
         waitForOneClientUp(c1);
 
         //Send ready message from client 1 to server
-        sendMessage("ready", c1);
+        sendMessage(new Message(Message.Type.ClientReady, "ready"), c1);
         sleep(1000);
         try {
             Assert.assertTrue(containLog("Client 1: Client ready"));
@@ -72,7 +72,7 @@ public class SimulationTest {
         c1 = new Client(5001);
         c2 = new Client(5001);
         c3 = new Client(5001);
-
+        log = new File("./log-" + 5001 +".txt").getAbsoluteFile();
         //Start server
         Thread server = new Thread(() -> s.start());
         server.start();
@@ -90,9 +90,9 @@ public class SimulationTest {
         waitForAllClientsUp();
 
         //Send ready messages from all three clients
-        sendMessage("ready", c1);
-        sendMessage("ready", c2);
-        sendMessage("ready", c3);
+        sendMessage(new Message(Message.Type.ClientReady, "ready"), c1);
+        sendMessage(new Message(Message.Type.ClientReady, "ready"), c2);
+        sendMessage(new Message(Message.Type.ClientReady, "ready"), c3);
 
         //Wait until all three players are ready
         waitForAllClientsReady();
@@ -122,7 +122,7 @@ public class SimulationTest {
         c1 = new Client(5002);
         c2 = new Client(5002);
         c3 = new Client(5002);
-
+        log = new File("./log-" + 5002 +".txt").getAbsoluteFile();
         //Start server
         Thread server = new Thread(() -> s.start());
         server.start();
@@ -140,14 +140,14 @@ public class SimulationTest {
         waitForAllClientsUp();
 
         //Send ready messages from all three clients
-        sendMessage("ready", c1);
-        sendMessage("ready", c2);
-        sendMessage("ready", c3);
+        sendMessage(new Message(Message.Type.ClientReady, "ready"), c1);
+        sendMessage(new Message(Message.Type.ClientReady, "ready"), c2);
+        sendMessage(new Message(Message.Type.ClientReady, "ready"), c3);
         //Wait until all three players are ready
         waitForServerReady();
 
         //Send a message from client 1 to score in Ones
-        sendMessage("Category: 1, Dices: [1,1,1,1,1]", c1);
+        sendMessage(new Message(Message.Type.Score, "Category: 1, Dices: [1,1,1,1,1]"), c1);
         sleep(2000);
 
         Assert.assertEquals(5, s.card.getScoreByCategory(0));
@@ -170,7 +170,7 @@ public class SimulationTest {
         c1 = new Client(5003);
         c2 = new Client(5003);
         c3 = new Client(5003);
-
+        log = new File("./log-" + 5003 +".txt").getAbsoluteFile();
         //Start server
         Thread server = new Thread(() -> s.start());
         server.start();
@@ -188,9 +188,9 @@ public class SimulationTest {
         waitForAllClientsUp();
 
         //Send ready messages from all three clients
-        sendMessage("ready", c1);
-        sendMessage("ready", c2);
-        sendMessage("ready", c3);
+        sendMessage(new Message(Message.Type.ClientReady, "ready"), c1);
+        sendMessage(new Message(Message.Type.ClientReady, "ready"), c2);
+        sendMessage(new Message(Message.Type.ClientReady, "ready"), c3);
         //Wait until all three players are ready
         waitForServerReady();
 
@@ -218,7 +218,7 @@ public class SimulationTest {
             String str = "Category: " + i + ", Dices: " + Arrays.toString(dices);
             System.out.println(str);
             //Send message from player
-            sendMessage(str, c);
+            sendMessage(new Message(Message.Type.Score, str), c);
             sleep(2000);
         }
         for(int i = 0; i < 9; i++){
@@ -244,7 +244,7 @@ public class SimulationTest {
     }
 
     //Send given message from given client
-    private void sendMessage(String msg, Client c) {
+    private void sendMessage(Message msg, Client c) {
         c.send(msg);
     }
 

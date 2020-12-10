@@ -26,7 +26,7 @@ public class Server {
             e.printStackTrace();
         }
         card = new ScoreCard();
-        log = new File("./log.txt");
+        log = new File("./log-" + port +".txt");
         //Create log file
         //And delete old one if exists
         try {
@@ -68,9 +68,9 @@ public class Server {
                         listenToClient(connection);
 
                         //Send ID to client
-                        send(connection.id, "Your ID is: " + connection.id);
+                        send(connection.id, new Message(Message.Type.ID, ""+connection.id));
                         //Give client a prompt to be ready for playing
-                        send(connection.id, "Check Ready -- Enter 'ready' when you are ready to play");
+                        send(connection.id, new Message(Message.Type.CheckReady, "Enter 'ready' when you are ready to play"));
                     } catch (SocketException e) {
                         logging("Server Socket closed, shut down connection");
                         return;
@@ -84,7 +84,7 @@ public class Server {
         gameEngine = new Thread(new Runnable() {
             public synchronized void run() {
                 logging("==Game start==");
-                sendAll("Game Start");
+                sendAll(new Message(Message.Type.Start, "Game Start"));
                 while (!card.isAllScored()) {
                     try {
                         wait();
@@ -166,21 +166,22 @@ public class Server {
     }
 
     //Handle messages coming from player
-    private synchronized void handleMessage(int playerID, String msg) {
+    private synchronized void handleMessage(int playerID, Message msg) {
         if (msg == null)
             return;
-        logging("From Client " + playerID + ": " + msg);
-        if (msg.startsWith("Category: ")) {
+        String message = msg.message;
+        logging("From Client " + playerID + ": " + message);
+        if (msg.type.equals(Message.Type.Score)) {
             if (!isReady()) {
                 System.out.println("Game is not ready yet, ignore this message");
                 return;
             }
             //Get the category
-            int category = Character.getNumericValue(msg.substring("Category: ".length()).charAt(0));
+            int category = Character.getNumericValue(message.substring("Category: ".length()).charAt(0));
 
             //Remove the substring before dices array
-            msg = msg.substring("Category: a, Dices: ".length());
-            String[] dicesString = msg.trim().substring(1, msg.length() - 1).split(",");
+            message = message.substring("Category: a, Dices: ".length());
+            String[] dicesString = message.trim().substring(1, message.length() - 1).split(",");
             int[] dices = new int[5];
             for (int i = 0; i < dicesString.length; i++) {
                 dices[i] = Integer.parseInt(dicesString[i].trim());
@@ -192,7 +193,7 @@ public class Server {
             }
             else
                 logging("Client " + playerID + " is trying to score an non-empty category, ignore this one");
-        } else if (msg.equals("ready")) {
+        } else if (msg.type.equals(Message.Type.ClientReady)) {
             list.get(playerID - 1).setReady(true);
         } else {
             logging("Anonymous input: " + msg + ". ignore");
@@ -210,14 +211,14 @@ public class Server {
         }
     }
 
-    private void send(int id, String msg) {
+    private void send(int id, Message msg) {
         for (Connection sct : list) {
             if (sct.getPlayerId() == id)
                 sct.send(msg);
         }
     }
 
-    private void sendAll(String msg) {
+    private void sendAll(Message msg) {
         for (Connection sct : list) {
             sct.send(msg);
         }
@@ -227,12 +228,12 @@ public class Server {
         new Thread(() -> {
             while (true) {
                 try {
-                    String msg = connection.in.readLine();
+                    Message msg = (Message) connection.in.readObject();
                     handleMessage(connection.id, msg);
                 } catch (SocketException e){
                     System.out.println("One of the client disconnected, close the server now");
                     System.exit(0);
-                } catch (IOException e) {
+                } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
             }
@@ -253,14 +254,15 @@ public class Server {
     //And reset re-roll counter and scorable list
     private void updateAfterScore(int playerID, int category) {
         String msg = "Update -- " + category + ", Client: " + playerID;
-        sendAll(msg);
-        msg = "Card -- " + card;
-        sendAll(msg);
+        sendAll(new Message(Message.Type.Update, msg));
+        msg = card.toString();
+        sendAll(new Message(Message.Type.Card, msg));
     }
 
     private void gameEnd(){
         logging("==Game ends==");
-        sendAll("End Card -- " + card);
+        String msg = card.toString();
+        sendAll(new Message(Message.Type.End, msg));
     }
 
     /*
