@@ -172,18 +172,13 @@ public class SimulationTest {
         c3 = new Client(5003);
         log = new File("./log-" + 5003 +".txt").getAbsoluteFile();
         //Start server
-        Thread server = new Thread(() -> s.start());
-        server.start();
+        s.start();
 
         //Start client
-        Thread client1 = new Thread(() -> c1.start());
-        Thread client2 = new Thread(() -> c2.start());
-        Thread client3 = new Thread(() -> c3.start());
-
         waitForServerUp();
-        client1.start();
-        client2.start();
-        client3.start();
+        c1.start();
+        c2.start();
+        c3.start();
 
         waitForAllClientsUp();
 

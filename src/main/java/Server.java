@@ -104,28 +104,30 @@ public class Server {
         up = true;
 
         //Wait until 3 players has joined game
-        try {
-            waitForConnection.join();
-            //Wait until all clients are ready
-            System.out.println("Waiting for ready signal from all clients......");
-            while (!checkReady()) {
-                Thread.sleep(100);
-            }
-            ready = true;
-            gameEngine.start();
+        new Thread(() -> {
+            try {
+                waitForConnection.join();
+                //Wait until all clients are ready
+                System.out.println("Waiting for ready signal from all clients......");
+                while (!checkReady()) {
+                    Thread.sleep(100);
+                }
+                ready = true;
+                gameEngine.start();
 
-            //Wait until game ends
-            gameEngine.join();
-            gameEnd();
-            //After game is complete, close all clients
-            //Then wait for 3 seconds and close ServerSocket
-            Thread.sleep(3000);
-            System.out.println("Game ends, closing server now");
-            close();
-        } catch (InterruptedException e) {
-            logging("Main server thread interrupted, closing now");
-            close();
-        }
+                //Wait until game ends
+                gameEngine.join();
+                gameEnd();
+                //After game is complete, close all clients
+                //Then wait for 3 seconds and close ServerSocket
+                Thread.sleep(3000);
+                System.out.println("Game ends, closing server now");
+                close();
+            } catch (InterruptedException e) {
+                logging("Main server thread interrupted, closing now");
+                close();
+            }
+        }).start();
     }
 
     //Method to close streams and socket
