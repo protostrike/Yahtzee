@@ -18,7 +18,7 @@ public class SimulationTest {
     //Waiter for waiting after each test case
     private final CountDownLatch waiter = new CountDownLatch(1);
 
-    @Test
+    //@Test
     public void test(){
         testOnePlayerReady();
         testServerReady();
