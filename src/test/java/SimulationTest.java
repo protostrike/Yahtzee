@@ -20,9 +20,9 @@ public class SimulationTest {
 
     @Test
     public void test(){
-        //testOnePlayerReady();
-        //testServerReady();
-        //testScoringFromOnePlayer();
+        testOnePlayerReady();
+        testServerReady();
+        testScoringFromOnePlayer();
         testMultiScoresFromMultiPlayer();
     }
 
@@ -31,17 +31,14 @@ public class SimulationTest {
         System.out.println("\nTest Case: Test single player's ready status\n");
         //Construct server and client
         s = new Server(5000);
-        c1 = new Client();
+        c1 = new Client(5000);
         log = new File("./log-" + 5000 +".txt").getAbsoluteFile();
         //Start server
-        Thread server = new Thread(() -> s.start());
-        server.start();
+        s.start();
 
         //Start Client
-        Thread client1 = new Thread(() -> c1.start());
-
         waitForServerUp();
-        client1.start();
+        c1.start();
 
         //Wait until client is up and running
         waitForOneClientUp(c1);
@@ -55,8 +52,6 @@ public class SimulationTest {
             System.out.println("Client cannot enter ready status");
         }
         System.out.println("Test single player's ready status passed");
-        server.interrupt();
-        client1.interrupt();
         try {
             waiter.await(1000 * 1000, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
@@ -74,18 +69,14 @@ public class SimulationTest {
         c3 = new Client(5001);
         log = new File("./log-" + 5001 +".txt").getAbsoluteFile();
         //Start server
-        Thread server = new Thread(() -> s.start());
-        server.start();
+        s.start();
 
         //Start client
-        Thread client1 = new Thread(() -> c1.start());
-        Thread client2 = new Thread(() -> c2.start());
-        Thread client3 = new Thread(() -> c3.start());
 
         waitForServerUp();
-        client1.start();
-        client2.start();
-        client3.start();
+        c1.start();
+        c2.start();
+        c3.start();
 
         waitForAllClientsUp();
 
@@ -104,11 +95,6 @@ public class SimulationTest {
         }
         System.out.println("Test Server ready status passed");
 
-        //Shut down thread after test
-        server.interrupt();
-        client1.interrupt();
-        client2.interrupt();
-        client3.interrupt();
         try {
             waiter.await(1000 * 1000, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
@@ -124,18 +110,14 @@ public class SimulationTest {
         c3 = new Client(5002);
         log = new File("./log-" + 5002 +".txt").getAbsoluteFile();
         //Start server
-        Thread server = new Thread(() -> s.start());
-        server.start();
+        s.start();
 
         //Start client
-        Thread client1 = new Thread(() -> c1.start());
-        Thread client2 = new Thread(() -> c2.start());
-        Thread client3 = new Thread(() -> c3.start());
 
         waitForServerUp();
-        client1.start();
-        client2.start();
-        client3.start();
+        c1.start();
+        c2.start();
+        c3.start();
 
         waitForAllClientsUp();
 
@@ -247,7 +229,7 @@ public class SimulationTest {
     //Wait if the server is not running
     private void waitForServerUp(){
         System.out.println("Wait until server is up and running properly");
-        while(!s.up){
+        while(!containLog("Server start")){
             sleep(1000);
             System.out.println("Still waiting...");
         }

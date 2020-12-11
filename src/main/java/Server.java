@@ -61,7 +61,7 @@ public class Server {
                     try {
                         s = ss.accept();
                         logging("A client is trying to connect in the server");
-                        Connection connection = new Connection(s, list.size() + 1);
+                        Connection connection = new Connection(s, list.size() + 1, ss.getLocalPort());
                         list.add(connection);
 
                         //Start thread listening to this client

@@ -7,14 +7,16 @@ public class Connection {
     ObjectOutputStream out;
     int id;
     boolean ready = false;
-
-    private File log = new File("./log.txt");
+    int port;
+    private File log;
     private FileWriter logWriter;
 
-    public Connection(Socket s, int id) {
+    public Connection(Socket s, int id, int port) {
         try {
+            this.port = port;
             this.out = new ObjectOutputStream(s.getOutputStream());
             this.in = new ObjectInputStream(s.getInputStream());
+            log = new File("./log-" + port +".txt");
         } catch (IOException e) {
             e.printStackTrace();
         }

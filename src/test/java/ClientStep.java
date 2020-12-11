@@ -13,10 +13,9 @@ public class ClientStep {
     static Client c1;
     static Client c2;
     static Client c3;
+    static File log = new File("./log-.txt").getAbsoluteFile();
 
     Thread serverThread;
-    File log;
-
     @Given("A server starts at port {int}")
     public void InitializeServer(Integer int1){
         log = new File("./log-" + int1 +".txt").getAbsoluteFile();
@@ -101,12 +100,10 @@ public class ClientStep {
     private boolean containLog(String msg){
         //Wait until log file is created
         while(!log.exists()){
-            System.out.println("Waiting for log file");
             sleep(100);
         }
         int counter = 1;
         while(counter < 5) {
-            System.out.println("Checking log");
             try {
                 Scanner scr = new Scanner(log);
                 while (scr.hasNextLine()) {
@@ -118,11 +115,10 @@ public class ClientStep {
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
-            System.out.println("Did not find log message, check again later");
             sleep(1000);
             counter++;
         }
-        System.out.println("Log checking timed out, no log message '" + msg + "' found");
+        Assert.fail("Log checking timed out, no log message '" + msg + "' found");
         return false;
     }
 
