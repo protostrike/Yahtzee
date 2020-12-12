@@ -237,7 +237,6 @@ import java.io.*;
                             break label;
                         case "3":
                             rerollCounter = 3; //Make re-rolls impossible
-
                             break label;
 
                         //Invalid input
@@ -256,7 +255,17 @@ import java.io.*;
             String msg = input.readLine();
             if(reset)
                 return;
-            int category = Integer.parseInt(msg);
+            int category;
+            while (true) {
+                try {
+                    category = Integer.parseInt(msg);
+                } catch (NumberFormatException e){
+                    System.out.println("Your input is not a number, please enter again");
+                    msg = input.readLine();
+                    continue;
+                }
+                break;
+            }
 
             //Send warning if category number is invalid
             while (category < 1 || category > 13) {
@@ -268,7 +277,7 @@ import java.io.*;
             }
 
             //Send warning if chosen category is already scored
-            while (!checkAvailableCategory(category)) {
+            while (!checkAvailableCategory(category-1)) {
                 System.out.println("The category you entered is already scored, please choose an unscored category");
                 msg = input.readLine();
                 if(reset)
@@ -374,13 +383,16 @@ import java.io.*;
         //Message's prefix is already removed
         private synchronized void handleUpdate(String msg){
             //Message supposed to be the scored category
-            int category = Character.getNumericValue(msg.charAt(0));
+            String categoryStr = msg.split(", Client:")[0];
+            int category = Integer.parseInt(categoryStr);
             scorableCategory[category-1] = false;
             int scorerID = Character.getNumericValue(msg.charAt(msg.length()-1));
             if(scorerID==id) {
                 //if this client made the last scoring, reset is not needed for it
                 System.out.println("Successfully scored in " + categoryNames[category-1]);
                 logging("Category index " + (category - 1) + " is scored");
+                System.out.println(categoryNames[category-1] + " has been scored!\n " +
+                        "you can press <<Enter>> now to start a new round");
             }
             else {
                 logging("Reset, a score is made by Client " + scorerID);

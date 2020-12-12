@@ -83,11 +83,12 @@ public class Server {
 
         gameEngine = new Thread(new Runnable() {
             public synchronized void run() {
+                System.out.println("Game start");
                 logging("==Game start==");
                 sendAll(new Message(Message.Type.Start, "Game Start"));
                 while (!card.isAllScored()) {
                     try {
-                        wait();
+                        Thread.sleep(100);
                     } catch (InterruptedException e) {
                         logging("Game engine thread interrupted, closing now");
                         close();
@@ -179,11 +180,13 @@ public class Server {
                 return;
             }
             //Get the category
-            int category = Character.getNumericValue(message.substring("Category: ".length()).charAt(0));
+            String categoryStr = message.split(", Dices:")[0].substring("Category: ".length());
+            int category = Integer.parseInt(categoryStr);
 
             //Remove the substring before dices array
             message = message.substring("Category: a, Dices: ".length());
-            String[] dicesString = message.trim().substring(1, message.length() - 1).split(",");
+            message = message.replace("["," ").replace("]"," ");
+            String[] dicesString = message.trim().split(",");
             int[] dices = new int[5];
             for (int i = 0; i < dicesString.length; i++) {
                 dices[i] = Integer.parseInt(dicesString[i].trim());
@@ -262,6 +265,7 @@ public class Server {
     }
 
     private void gameEnd(){
+        System.out.println("Game ends, sending final card to clients now");
         logging("==Game ends==");
         String msg = card.toString();
         sendAll(new Message(Message.Type.End, msg));
